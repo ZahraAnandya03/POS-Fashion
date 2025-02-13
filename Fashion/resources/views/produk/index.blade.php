@@ -4,15 +4,17 @@
 <div class="container">
     <h2>Daftar Produk</h2>
 
-    <!-- Tombol Tambah Produk -->
     <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#modalTambah">Tambah Produk</button>
 
-    <!-- Tabel Produk -->
     <table class="table table-bordered">
-        <thead>
+        <thead class="table-dark">
             <tr>
-                <th>Id</th>
+                <th>No</th>
                 <th>Nama Produk</th>
+                <th>Kategori</th>
+                <th>Harga</th>
+                <th>Stok</th>
+                <th>Gambar</th>
                 <th>Aksi</th>
             </tr>
         </thead>
@@ -20,22 +22,31 @@
             @foreach ($produk as $key => $p)
             <tr>
                 <td>{{ $key + 1 }}</td>
-                <td>{{ $p->nama_produk }}</td>
+                <td>{{ $p->nama }}</td>
+                <td>{{ $p->kategori->nama ?? '-' }}</td>
+                <td>Rp {{ number_format($p->harga, 2, ',', '.') }}</td>
+                <td>{{ $p->stok }}</td>
                 <td>
-                    <!-- Tombol Edit -->
+                    @if($p->gambar)
+                        <img src="{{ asset('storage/' . $p->gambar) }}" width="50">
+                    @else
+                        -
+                    @endif
+                </td>
+                <td>
                     <button class="btn btn-primary btn-sm btn-edit" 
                             data-id="{{ $p->id }}" 
-                            data-nama="{{ $p->nama_produk }}"
+                            data-nama="{{ $p->nama }}"
+                            data-kategori="{{ $p->kategori->id ?? '' }}"
+                            data-harga="{{ $p->harga }}"
+                            data-stok="{{ $p->stok }}"
+                            data-gambar="{{ $p->gambar ? asset('storage/' . $p->gambar) : '' }}"
                             data-bs-toggle="modal" data-bs-target="#modalEdit">
-                        Edit
+                            <i class="fas fa-edit"></i>
                     </button>
-
-                    <!-- Tombol Hapus -->
-                    <form action="{{ route('produk.destroy', $p->id) }}" method="POST" class="d-inline form-hapus">
-                        @csrf
-                        @method('DELETE')
-                        <button type="button" class="btn btn-danger btn-sm btn-hapus">Hapus</button>
-                    </form>
+                    <button onclick="confirmDelete({{ $p->id }})" class="btn btn-danger btn-sm">
+                        <i class="fa fa-trash-alt"></i>
+                    </button>
                 </td>
             </tr>
             @endforeach
@@ -52,11 +63,32 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form action="{{ route('produk.store') }}" method="POST">
+                <form id="formTambah" action="{{ route('produk.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <div class="mb-3">
-                        <label for="nama_produk" class="form-label">Nama Produk</label>
-                        <input type="text" class="form-control" name="nama_produk" required>
+                        <label class="form-label">Nama Produk</label>
+                        <input type="text" class="form-control" name="nama" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="kategori" class="form-label">Kategori</label>
+                        <select name="kategori_id" class="form-control" required>
+                            <option value="">-- Pilih Kategori --</option>
+                            @foreach($kategori as $k)
+                                <option value="{{ $k->id }}">{{ $k->nama }}</option>
+                            @endforeach
+                        </select>
+                    </div>                    
+                    <div class="mb-3">
+                        <label class="form-label">Harga</label>
+                        <input type="number" class="form-control" name="harga" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Stok</label>
+                        <input type="number" class="form-control" name="stok" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Gambar</label>
+                        <input type="file" class="form-control" name="gambar">
                     </div>
                     <button type="submit" class="btn btn-primary">Simpan</button>
                 </form>
@@ -65,91 +97,121 @@
     </div>
 </div>
 
-<!-- Modal Edit Produk -->
-<div class="modal fade" id="modalEdit" tabindex="-1" aria-labelledby="modalEditLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalEditLabel">Edit Produk</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="formEdit" method="POST">
-                    @csrf
-                    @method('PUT')
-                    <div class="mb-3">
-                        <label for="edit_nama_produk" class="form-label">Nama Produk</label>
-                        <input type="text" class="form-control" id="edit_nama_produk" name="nama_produk" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Update</button>
-                </form>
+    <!-- Modal Edit Produk -->
+    <div class="modal fade" id="modalEdit" tabindex="-1" aria-labelledby="modalEditLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalEditLabel">Edit Produk</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formEdit" method="POST" enctype="multipart/form-data">
+                        @csrf
+                        @method('PUT')
+                        <div class="mb-3">
+                            <label class="form-label">Nama Produk</label>
+                            <input type="text" id="edit_nama" name="nama" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Kategori</label>
+                            <select id="edit_kategori" name="kategori_id" class="form-control" required>
+                                @foreach($kategori as $k)
+                                    <option value="{{ $k->id }}">{{ $k->nama }}</option>
+                                @endforeach
+                            </select>
+                        </div>                    
+                        <div class="mb-3">
+                            <label class="form-label">Harga</label>
+                            <input type="number" id="edit_harga" name="harga" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Stok</label>
+                            <input type="number" id="edit_stok" name="stok" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Gambar</label>
+                            <input type="file" class="form-control" name="gambar">
+                            <img id="edit_gambar" src="" width="100" style="display: none; margin-top: 10px;">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Update</button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
-</div>
+
 
 @endsection
 
 @push('scripts')
 
-<!-- SweetAlert -->
-<script>
-    @if (session('success'))
-        Swal.fire({
-            title: 'Berhasil!',
-            text: "{{ session('success') }}",
-            icon: 'success',
-            confirmButtonText: 'OK'
-        });
-    @endif
-
-    @if ($errors->any())
-        Swal.fire({
-            title: 'Login Gagal!',
-            text: "{{ $errors->first() }}",
-            icon: 'error',
-            confirmButtonText: 'OK'
-        });
-    @endif
-</script>
-
-<!-- SweetAlert & Script -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        // Handle Klik Edit
-        document.querySelectorAll(".btn-edit").forEach(button => {
-            button.addEventListener("click", function () {
-                let id = this.getAttribute("data-id");
-                let nama = this.getAttribute("data-nama");
-
-                // Set nilai di modal
-                document.getElementById("edit_nama_produk").value = nama;
-                document.getElementById("formEdit").setAttribute("action", `/produk/${id}`);
+    @if(session('success'))
+        <script>
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: '{{ session("success") }}'
             });
-        });
+        </script>
+    @endif
+    
+        <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll(".btn-edit").forEach(button => {
+                button.addEventListener("click", function () {
+                    document.getElementById("edit_nama").value = this.dataset.nama;
+                    document.getElementById("edit_kategori").value = this.dataset.kategori;
+                    document.getElementById("edit_harga").value = this.dataset.harga;
+                    document.getElementById("edit_stok").value = this.dataset.stok;
 
-        // Handle Klik Hapus dengan SweetAlert
-        document.querySelectorAll(".btn-hapus").forEach(button => {
-            button.addEventListener("click", function () {
-                let form = this.closest(".form-hapus");
-
-                Swal.fire({
-                    title: "Apakah Anda yakin?",
-                    text: "Data ini akan dihapus permanen!",
-                    icon: "warning",
-                    showCancelButton: true,
-                    confirmButtonColor: "#d33",
-                    cancelButtonColor: "#3085d6",
-                    confirmButtonText: "Ya, Hapus!",
-                    cancelButtonText: "Batal"
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        form.submit();
+                    let gambar = this.dataset.gambar;
+                    if (gambar) {
+                        document.getElementById("edit_gambar").src = gambar;
+                        document.getElementById("edit_gambar").style.display = "block";
+                    } else {
+                        document.getElementById("edit_gambar").style.display = "none";
                     }
+                    
+                    let formEdit = document.getElementById("formEdit");
+                    formEdit.setAttribute("action", `/produk/${this.dataset.id}`);
                 });
             });
         });
-    });
-</script>
+
+        function confirmDelete(id) {
+            Swal.fire({
+                title: 'Apakah Anda yakin?',
+                text: "Data produk ini akan dihapus dan tidak bisa dikembalikan!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    let form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = `/produk/${id}`;
+
+                    let csrfToken = document.createElement('input');
+                    csrfToken.type = 'hidden';
+                    csrfToken.name = '_token';
+                    csrfToken.value = '{{ csrf_token() }}';
+                    form.appendChild(csrfToken);
+
+                    let methodInput = document.createElement('input');
+                    methodInput.type = 'hidden';
+                    methodInput.name = '_method';
+                    methodInput.value = 'DELETE';
+                    form.appendChild(methodInput);
+
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
+        }
+        </script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 @endpush

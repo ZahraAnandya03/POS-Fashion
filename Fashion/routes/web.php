@@ -7,6 +7,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\BarangController;
+use App\Http\Controllers\KategoriController;
 
 // Rute default diarahkan ke login
 Route::get('/', function () {
@@ -28,8 +29,8 @@ Route::get('/admin/dashboard', [AdminController::class, 'index']);
 });
 });
 
+//kategori
+Route::resource('kategori', KategoriController::class);
+
 //produk
 Route::resource('produk', ProdukController::class);
-
-//barang
-Route::resource('barang', BarangController::class);

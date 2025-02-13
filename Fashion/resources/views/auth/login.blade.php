@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - SB Admin Dark Mode</title>
+    <title>Login - SB Admin Light Mode</title>
 
     <!-- Bootstrap & FontAwesome -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -15,30 +15,30 @@
     <style>
         /* Background */
         body {
-            background: linear-gradient(to right, #000000, #2C2C2C);
+            background: linear-gradient(to right, #ffffff, #f2f2f2);
             height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             font-family: 'Poppins', sans-serif;
+            color: #333;
         }
 
         /* Card Styling */
         .card {
             border-radius: 12px;
-            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.5);
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(8px);
+            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
+            background: #ffffff;
             padding: 20px;
             width: 400px;
-            color: white;
+            color: #333;
         }
 
         /* Card Header */
         .card-header {
             font-size: 22px;
             font-weight: bold;
-            background: linear-gradient(to right, #000000, #4B4B4B);
+            background: linear-gradient(to right, #3b4550, #3b4550);
             color: white;
             border-radius: 12px 12px 0 0;
             text-align: center;
@@ -54,7 +54,7 @@
 
         /* Button Styling */
         .btn-primary {
-            background: linear-gradient(to right, #1E1E1E, #4B4B4B);
+            background: linear-gradient(to right, #3b4550, #3b4550);
             border: none;
             padding: 12px;
             font-size: 16px;
@@ -65,13 +65,13 @@
         }
 
         .btn-primary:hover {
-            background: linear-gradient(to right, #4B4B4B, #6E6E6E);
+            background: linear-gradient(to right, #3b4550, #3b4550);
             transform: scale(1.05);
         }
 
         /* Input Field Styling */
         .input-group-text {
-            background: linear-gradient(to right, #1E1E1E, #4B4B4B);
+            background: #3b4550;
             color: white;
             border: none;
             border-radius: 8px 0 0 8px;
@@ -83,27 +83,15 @@
 
         .form-control {
             border-radius: 0 8px 8px 0;
-            background: #121212;
-            color: white;
-            border: 1px solid #4B4B4B;
+            background: #f9f9f9;
+            color: #333;
+            border: 1px solid #ccc;
             padding: 12px;
         }
 
         .form-control:focus {
-            box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.3);
-            border-color: #ffffff;
-        }
-
-        /* SweetAlert Animation */
-        .alert {
-            border-radius: 8px;
-            animation: fadeIn 0.5s ease-in-out;
-        }
-
-        /* Fade In Animation */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
+            box-shadow: 0px 0px 10px rgba(0, 123, 255, 0.3);
+            border-color: #3b4550;
         }
 
         /* Responsive Design */
@@ -117,7 +105,6 @@
                 padding: 10px;
             }
         }
-
     </style>
 </head>
 <body>
