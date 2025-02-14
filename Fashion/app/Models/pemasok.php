@@ -13,5 +13,18 @@ class Pemasok extends Model
 
     protected $fillable = [
         'nama_pemasok',
+        'nomor_telepon',
+        'email',
+        'alamat',
+        'nama_kontak',
+        'catatan',
     ];
+
+    public function produk()
+    {
+        return $this->hasMany(Produk::class, 'pemasok_id');
+    }
+    
 }
+
+

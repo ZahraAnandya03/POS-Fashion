@@ -11,6 +11,8 @@
         <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet" />
         <link href="{{ asset('template/css/styles.css') }}" rel="stylesheet" />
         <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     </head>
     <body class="sb-nav-fixed">
         <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
@@ -52,11 +54,11 @@
                                 <div class="sb-nav-link-icon"><i class="fas fa-tshirt"></i></div>
                                 Produk
                             </a>
-                            <a class="nav-link" href="suppliers.html">
+                            <a class="nav-link" href="{{ route('pemasok.index') }}">
                                 <div class="sb-nav-link-icon"><i class="fas fa-truck"></i></div>
                                 Pemasok
                             </a>
-                            <a class="nav-link" href="customers.html">
+                            <a class="nav-link" href="{{ route('pelanggan.index') }}">
                                 <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
                                 Pelanggan
                             </a>
@@ -67,6 +69,10 @@
                             <a class="nav-link" href="reports.html">
                                 <div class="sb-nav-link-icon"><i class="fas fa-file-alt"></i></div>
                                 Laporan
+                            </a>
+                            <a class="nav-link" href="#user">
+                                <div class="sb-nav-link-icon"><i class="fas fa-user"></i></div>
+                                User
                             </a>
                             <a class="nav-link" href="settings.html">
                                 <div class="sb-nav-link-icon"><i class="fas fa-cog"></i></div>
@@ -87,12 +93,12 @@
                         <ol class="breadcrumb mb-4">
                             <li class="breadcrumb-item active">Dashboard</li>
                         </ol>
-                        <d<div class="row">
+                        <div class="row">
                             <div class="col-xl-3 col-md-6">
                                 <div class="card bg-primary text-white mb-4">
                                     <div class="card-body">Produk</div>
                                     <div class="card-footer d-flex align-items-center justify-content-between">
-                                        <span class="small text-white">150</span>
+                                        <span class="small text-white">{{ $jumlahProduk }}</span>
                                         <div class="small text-white"><i class="fas fa-box"></i></div>
                                     </div>
                                 </div>
@@ -110,7 +116,7 @@
                                 <div class="card bg-warning text-white mb-4">
                                     <div class="card-body">Pelanggan</div>
                                     <div class="card-footer d-flex align-items-center justify-content-between">
-                                        <span class="small text-white">500</span>
+                                        <span class="small text-white">{{ $jumlahPelanggan }}</span>
                                         <div class="small text-white"><i class="fas fa-users"></i></div>
                                     </div>
                                 </div>
@@ -119,7 +125,7 @@
                                 <div class="card bg-danger text-white mb-4">
                                     <div class="card-body">Pemasok</div>
                                     <div class="card-footer d-flex align-items-center justify-content-between">
-                                        <span class="small text-white">45</span>
+                                        <span class="small text-white">{{ $jumlahPemasok }}</span>
                                         <div class="small text-white"><i class="fas fa-truck"></i></div>
                                     </div>
                                 </div>

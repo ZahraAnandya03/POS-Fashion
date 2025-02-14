@@ -10,14 +10,5 @@ class Pelanggan extends Model
     use HasFactory;
 
     protected $table = 'pelanggan';
-    protected $primaryKey = 'id';
-    public $timestamps = true;
-
-    protected $fillable = [
-        'kode_pelanggan',
-        'nama',
-        'alamat',
-        'no_telp',
-        'email',
-    ];
+    protected $fillable = ['kode_pelanggan', 'nama', 'alamat', 'no_telp', 'email'];
 }

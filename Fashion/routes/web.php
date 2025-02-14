@@ -8,6 +8,9 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\BarangController;
 use App\Http\Controllers\KategoriController;
+use App\Http\Controllers\PemasokController;
+use App\Http\Controllers\PelangganController;
+use App\Models\Pelanggan;
 
 // Rute default diarahkan ke login
 Route::get('/', function () {
@@ -21,7 +24,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Middleware untuk memastikan hanya user yang login bisa mengakses dashboard
 Route::middleware('auth')->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
 // Rute khusus admin
 Route::middleware('admin')->group(function () {
@@ -34,3 +37,9 @@ Route::resource('kategori', KategoriController::class);
 
 //produk
 Route::resource('produk', ProdukController::class);
+
+//pemasok
+Route::resource('pemasok', PemasokController::class);
+
+//peelanggan
+Route::resource('pelanggan', PelangganController::class);

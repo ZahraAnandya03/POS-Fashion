@@ -73,11 +73,11 @@
                             <div class="sb-nav-link-icon"><i class="fas fa-tshirt"></i></div>
                             Produk
                         </a>
-                        <a class="nav-link" href="#pemasok">
+                        <a class="nav-link" href="{{ route('pemasok.index') }}">
                             <div class="sb-nav-link-icon"><i class="fas fa-truck"></i></div>
                             Pemasok
                         </a>
-                        <a class="nav-link" href="#pelanggan">
+                        <a class="nav-link" href="{{ route('pelanggan.index') }}">
                             <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
                             Pelanggan
                         </a>
@@ -88,6 +88,10 @@
                         <a class="nav-link" href="#laporan">
                             <div class="sb-nav-link-icon"><i class="fas fa-file-alt"></i></div>
                             Laporan
+                        </a>
+                        <a class="nav-link" href="#user">
+                            <div class="sb-nav-link-icon"><i class="fas fa-user"></i></div>
+                            User
                         </a>
                         <a class="nav-link" href="#pengaturan">
                             <div class="sb-nav-link-icon"><i class="fas fa-cog"></i></div>
@@ -114,6 +118,7 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ asset('sb-admin/js/scripts.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @stack('scripts')
 
 </body>
