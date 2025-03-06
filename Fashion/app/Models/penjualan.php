@@ -2,30 +2,31 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Pelanggan;
+use App\Models\DetailPenjualan;
 
 class Penjualan extends Model
 {
-    use HasFactory;
-
     protected $table = 'penjualan';
 
     protected $fillable = [
         'no_faktur',
         'tgl_faktur',
         'total_bayar',
+        'dibayar',
+        'kembali',
         'pelanggan_id',
-        'user_id'
+        'size', 
     ];
 
     public function pelanggan()
     {
-        return $this->belongsTo(Pelanggan::class);
+        return $this->belongsTo(Pelanggan::class, 'pelanggan_id');
     }
 
-    public function user()
+    public function detail()
     {
-        return $this->belongsTo(User::class);
+        return $this->hasMany(DetailPenjualan::class, 'penjualan_id');
     }
 }

@@ -4,8 +4,46 @@
 <div class="container">
     <h2>Daftar Produk</h2>
 
-    <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#modalTambah">Tambah Produk</button>
-
+    <div class="row mb-3 align-items-end">
+        <div class="col">
+            <form method="GET" action="{{ route('produk.index') }}" class="row g-3">
+                <div class="col-auto">
+                    <label for="search" class="form-label">Cari Produk</label>
+                    <input type="text" name="search" id="search" class="form-control" 
+                           placeholder="Nama produk..." value="{{ request('search') }}">
+                </div>
+    
+                <div class="col-auto">
+                    <label for="entries" class="form-label">Show Entries</label>
+                    <select name="entries" id="entries" class="form-select" onchange="this.form.submit()">
+                        @php
+                            // Beberapa opsi jumlah data per halaman
+                            $options = [5, 10, 25, 50, 100];
+                        @endphp
+                        @foreach($options as $opt)
+                            <option value="{{ $opt }}" 
+                                {{ (request('entries') == $opt) ? 'selected' : '' }}>
+                                {{ $opt }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+    
+                <div class="col-auto d-flex align-items-end">
+                    <button type="submit" class="btn btn-secondary">
+                        Search
+                    </button>
+                </div>
+            </form>
+        </div>
+    
+        <div class="col-auto">
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalTambah">
+                Tambah Produk
+            </button>
+        </div>
+    </div>
+    
     <table class="table table-bordered">
         <thead class="table-dark">
             <tr>
@@ -14,6 +52,7 @@
                 <th>Kategori</th>
                 <th>Harga</th>
                 <th>Stok</th>
+                <th>Size</th>
                 <th>Gambar</th>
                 <th>Aksi</th>
             </tr>
@@ -26,9 +65,10 @@
                 <td>{{ $p->kategori->nama ?? '-' }}</td>
                 <td>Rp {{ number_format($p->harga, 2, ',', '.') }}</td>
                 <td>{{ $p->stok }}</td>
-                <td>
+                <td>{{ $p->size ?? '-' }}</td>
+                <td class="text-center">
                     @if($p->gambar)
-                        <img src="{{ asset('storage/' . $p->gambar) }}" width="50">
+                        <img src="{{ asset('storage/' . $p->gambar) }}" width="130" class="d-block mx-auto">
                     @else
                         -
                     @endif
@@ -40,6 +80,7 @@
                             data-kategori="{{ $p->kategori->id ?? '' }}"
                             data-harga="{{ $p->harga }}"
                             data-stok="{{ $p->stok }}"
+                            data-size="{{ $p->size }}"
                             data-gambar="{{ $p->gambar ? asset('storage/' . $p->gambar) : '' }}"
                             data-bs-toggle="modal" data-bs-target="#modalEdit">
                             <i class="fas fa-edit"></i>
@@ -87,6 +128,10 @@
                         <input type="number" class="form-control" name="stok" required>
                     </div>
                     <div class="mb-3">
+                        <label class="form-label">Size</label>
+                        <input type="text" class="form-control" name="size" placeholder="Contoh: S, M, L atau ukuran numerik">
+                    </div>
+                    <div class="mb-3">
                         <label class="form-label">Gambar</label>
                         <input type="file" class="form-control" name="gambar">
                     </div>
@@ -97,50 +142,53 @@
     </div>
 </div>
 
-    <!-- Modal Edit Produk -->
-    <div class="modal fade" id="modalEdit" tabindex="-1" aria-labelledby="modalEditLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalEditLabel">Edit Produk</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="formEdit" method="POST" enctype="multipart/form-data">
-                        @csrf
-                        @method('PUT')
-                        <div class="mb-3">
-                            <label class="form-label">Nama Produk</label>
-                            <input type="text" id="edit_nama" name="nama" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Kategori</label>
-                            <select id="edit_kategori" name="kategori_id" class="form-control" required>
-                                @foreach($kategori as $k)
-                                    <option value="{{ $k->id }}">{{ $k->nama }}</option>
-                                @endforeach
-                            </select>
-                        </div>                    
-                        <div class="mb-3">
-                            <label class="form-label">Harga</label>
-                            <input type="number" id="edit_harga" name="harga" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Stok</label>
-                            <input type="number" id="edit_stok" name="stok" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Gambar</label>
-                            <input type="file" class="form-control" name="gambar">
-                            <img id="edit_gambar" src="" width="100" style="display: none; margin-top: 10px;">
-                        </div>
-                        <button type="submit" class="btn btn-primary">Update</button>
-                    </form>
-                </div>
+<!-- Modal Edit Produk -->
+<div class="modal fade" id="modalEdit" tabindex="-1" aria-labelledby="modalEditLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalEditLabel">Edit Produk</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formEdit" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    @method('PUT')
+                    <div class="mb-3">
+                        <label class="form-label">Nama Produk</label>
+                        <input type="text" id="edit_nama" name="nama" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Kategori</label>
+                        <select id="edit_kategori" name="kategori_id" class="form-control" required>
+                            @foreach($kategori as $k)
+                                <option value="{{ $k->id }}">{{ $k->nama }}</option>
+                            @endforeach
+                        </select>
+                    </div>                    
+                    <div class="mb-3">
+                        <label class="form-label">Harga</label>
+                        <input type="number" id="edit_harga" name="harga" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Stok</label>
+                        <input type="number" id="edit_stok" name="stok" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Size</label>
+                        <input type="text" id="edit_size" name="size" class="form-control" placeholder="Contoh: S, M, L atau ukuran numerik">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Gambar</label>
+                        <input type="file" class="form-control" name="gambar">
+                        <img id="edit_gambar" src="" width="100" style="display: none; margin-top: 10px;">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Update</button>
+                </form>
             </div>
         </div>
     </div>
-
+</div>
 
 @endsection
 
@@ -156,7 +204,7 @@
         </script>
     @endif
     
-        <script>
+    <script>
         document.addEventListener("DOMContentLoaded", function () {
             document.querySelectorAll(".btn-edit").forEach(button => {
                 button.addEventListener("click", function () {
@@ -164,7 +212,8 @@
                     document.getElementById("edit_kategori").value = this.dataset.kategori;
                     document.getElementById("edit_harga").value = this.dataset.harga;
                     document.getElementById("edit_stok").value = this.dataset.stok;
-
+                    document.getElementById("edit_size").value = this.dataset.size ? this.dataset.size : '';
+                    
                     let gambar = this.dataset.gambar;
                     if (gambar) {
                         document.getElementById("edit_gambar").src = gambar;
@@ -212,6 +261,6 @@
                 }
             });
         }
-        </script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 @endpush

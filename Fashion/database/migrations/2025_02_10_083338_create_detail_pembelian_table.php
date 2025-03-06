@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('detail_pembelian', function (Blueprint $table) {
             $table->id();
             $table->foreignId('pembelian_id')->constrained('pembelian');
-            $table->foreignId('barang_id')->constrained('barang');
+            $table->foreignId('produk_id')->constrained('produk');
             $table->double('harga_beli');
             $table->integer('jumlah');
             $table->double('sub_total');

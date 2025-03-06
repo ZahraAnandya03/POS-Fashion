@@ -17,11 +17,15 @@ return new class extends Migration
             $table->foreignId('kategori_id')->constrained('kategori');
             $table->decimal('harga', 10, 2);
             $table->integer('stok');
+            $table->string('size')->nullable(); // Tambahkan ini untuk size
             $table->string('gambar')->nullable();
             $table->timestamps();
         });
     }
 
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
         Schema::dropIfExists('produk');

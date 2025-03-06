@@ -12,12 +12,14 @@
         <link href="{{ asset('template/css/styles.css') }}" rel="stylesheet" />
         <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     </head>
     <body class="sb-nav-fixed">
         <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
             <a class="navbar-brand ps-3" href="index.html">POS Fashion</a>
-            <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#"><i class="fas fa-bars"></i></button>
+            <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#">
+                <i class="fas fa-bars"></i>
+            </button>
             <form class="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0">
                 <div class="input-group">
                     <input class="form-control" type="text" placeholder="Search for..." aria-label="Search for..." aria-describedby="btnNavbarSearch" />
@@ -26,12 +28,21 @@
             </form>
             <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-user fa-fw"></i></a>
+                    <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-user fa-fw"></i>
+                    </a>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                         <li><a class="dropdown-item" href="#">Settings</a></li>
                         <li><a class="dropdown-item" href="#">Activity Log</a></li>
                         <li><hr class="dropdown-divider" /></li>
-                        <li><a class="dropdown-item text-danger bg-light" href="#">Logout</a></li>
+                        <li>
+                            <form action="{{ route('logout') }}" method="POST">
+                                @csrf
+                                <button type="submit" class="dropdown-item text-danger bg-light">
+                                    Logout
+                                </button>
+                            </form>
+                        </li>                        
                     </ul>
                 </li>
             </ul>
@@ -62,15 +73,19 @@
                                 <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
                                 Pelanggan
                             </a>
-                            <a class="nav-link" href="transactions.html">
+                            <a class="nav-link" href="{{ route('penjualan.index') }}">
+                                <div class="sb-nav-link-icon"><i class="fas fa-store"></i></div>
+                                Penjualan
+                            </a>
+                            <a class="nav-link" href="{{ route('kasir.index') }}">
                                 <div class="sb-nav-link-icon"><i class="fas fa-cash-register"></i></div>
-                                Transaksi
+                                Kasir
                             </a>
                             <a class="nav-link" href="reports.html">
                                 <div class="sb-nav-link-icon"><i class="fas fa-file-alt"></i></div>
                                 Laporan
                             </a>
-                            <a class="nav-link" href="#user">
+                            <a class="nav-link" href="{{ route('user.index') }}">
                                 <div class="sb-nav-link-icon"><i class="fas fa-user"></i></div>
                                 User
                             </a>
@@ -93,6 +108,8 @@
                         <ol class="breadcrumb mb-4">
                             <li class="breadcrumb-item active">Dashboard</li>
                         </ol>
+
+                        <!-- Bagian Card Data -->
                         <div class="row">
                             <div class="col-xl-3 col-md-6">
                                 <div class="card bg-primary text-white mb-4">
@@ -107,7 +124,7 @@
                                 <div class="card bg-success text-white mb-4">
                                     <div class="card-body">Transaksi</div>
                                     <div class="card-footer d-flex align-items-center justify-content-between">
-                                        <span class="small text-white">320</span>
+                                        <span class="small text-white">{{ $jumlahPenjualan }}</span>
                                         <div class="small text-white"><i class="fas fa-receipt"></i></div>
                                     </div>
                                 </div>
@@ -130,12 +147,86 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>                        
+                        </div>
+
+                        <!-- Bagian Chart Penjualan Perbulan -->
+                        <div class="row">
+                            <div class="col-xl-12">
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <i class="fas fa-chart-bar me-1"></i>
+                                        Grafik Penjualan Perbulan
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas id="penjualanChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </main>
             </div>
         </div>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+       <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
         <script src="{{ asset('template/js/scripts.js') }}"></script>
-    </body>
+<script>
+    @if (session('success'))
+        Swal.fire({
+            title: 'Berhasil!',
+            text: "{{ session('success') }}",
+            icon: 'success',
+            confirmButtonText: 'OK'
+        });
+    @endif
+
+    // Inisialisasi grafik penjualan perbulan
+    <canvas id="penjualanChart"></canvas>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const penjualanCtx = document.getElementById('penjualanChart').getContext('2d');
+        const penjualanChart = new Chart(penjualanCtx, {
+            type: 'bar',
+            data: {
+                labels: {!! json_encode($bulanPenjualan) !!},
+                datasets: [{
+                    label: 'Total Penjualan (Rp)',
+                    data: {!! json_encode($jumlahPenjualanBulanan) !!},
+                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(value);
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) label += ': ';
+                                if (context.parsed.y !== null) {
+                                    label += new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(context.parsed.y);
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</script>
+</body>
 </html>
+

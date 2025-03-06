@@ -81,15 +81,19 @@
                             <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
                             Pelanggan
                         </a>
-                        <a class="nav-link" href="#transaksi">
+                        <a class="nav-link" href="{{ route('penjualan.index') }}">
+                            <div class="sb-nav-link-icon"><i class="fas fa-store"></i></div>
+                            Penjualan
+                        </a>
+                        <a class="nav-link" href="{{ route('kasir.index') }}">
                             <div class="sb-nav-link-icon"><i class="fas fa-cash-register"></i></div>
-                            Transaksi
+                            Kasir
                         </a>
                         <a class="nav-link" href="#laporan">
                             <div class="sb-nav-link-icon"><i class="fas fa-file-alt"></i></div>
                             Laporan
                         </a>
-                        <a class="nav-link" href="#user">
+                        <a class="nav-link" href="{{ route('user.index') }}">
                             <div class="sb-nav-link-icon"><i class="fas fa-user"></i></div>
                             User
                         </a>

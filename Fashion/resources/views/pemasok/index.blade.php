@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container">
-    <h1>Daftar Pemasok</h1>
+    <h2>Daftar Pemasok</h2>
     <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#tambahPemasokModal">Tambah Pemasok</button>
 
     <table class="table table-bordered">

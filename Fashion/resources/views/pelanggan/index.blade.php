@@ -2,8 +2,30 @@
 
 @section('content')
 <div class="container">
-    <h1>Daftar Pelanggan</h1>
-    <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#tambahPelangganModal">Tambah Pelanggan</button>
+    <h2>Daftar Pelanggan</h2>
+
+    <div class="row mb-3 align-items-end">
+        <div class="col">
+            <form method="GET" action="{{ route('pelanggan.index') }}" class="row g-3">
+                <div class="col-auto">
+                    <label for="search" class="form-label">Cari Pelanggan</label>
+                    <input type="text" name="search" id="search" class="form-control"
+                           placeholder="Nama atau Kode Pelanggan" value="{{ request('search') }}">
+                </div>
+                <div class="col-auto d-flex align-items-end">
+                    <button type="submit" class="btn btn-secondary">
+                        Search
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <div class="col-auto">
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#tambahPelangganModal">
+                Tambah Pelanggan
+            </button>
+        </div>
+    </div>
 
     <table class="table table-bordered">
         <thead class="table-dark">

@@ -2,22 +2,8 @@
 
 @section('content')
 <div class="container">
-    <h3>Daftar Kategori</h3>
-
-    <!-- Tombol untuk membuka modal tambah kategori -->
-    <button class="btn btn-primary my-3" data-bs-toggle="modal" data-bs-target="#modalTambahKategori">
-        Tambah Kategori
-    </button>
-
-    @if(session('success'))
-        <script>
-            Swal.fire({
-                icon: 'success',
-                title: 'Berhasil!',
-                text: '{{ session("success") }}'
-            });
-        </script>
-    @endif
+    <h2>Daftar Kategori</h2>
+    <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#modalTambahKategori">Tambah Kategori</button>
 
     <table class="table table-bordered">
         <thead class="table-dark">
@@ -95,53 +81,62 @@
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-    // Modal Edit
-    document.querySelectorAll('.btn-edit').forEach(button => {
-        button.addEventListener('click', function () {
-            let id = this.getAttribute('data-id');
-            let nama = this.getAttribute('data-nama');
+    @if(session('success'))
+        <script>
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: '{{ session("success") }}'
+            });
+    @endif
 
-            document.getElementById('editNama').value = nama;
-            document.getElementById('formEditKategori').setAttribute('action', `/kategori/${id}`);
+        document.addEventListener("DOMContentLoaded", function () {
+        // Modal Edit
+        document.querySelectorAll('.btn-edit').forEach(button => {
+            button.addEventListener('click', function () {
+                let id = this.getAttribute('data-id');
+                let nama = this.getAttribute('data-nama');
+
+                document.getElementById('editNama').value = nama;
+                document.getElementById('formEditKategori').setAttribute('action', `/kategori/${id}`);
+            });
         });
     });
-});
 
-// Fungsi hapus dengan konfirmasi SweetAlert
-function confirmDelete(id) {
-    Swal.fire({
-        title: 'Apakah Anda yakin?',
-        text: "Data ini akan dihapus dan tidak bisa dikembalikan!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Ya, hapus!',
-        cancelButtonText: 'Batal'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            let form = document.createElement('form');
-            form.method = 'POST';
-            form.action = `/kategori/${id}`;
-            
-            let csrfToken = document.createElement('input');
-            csrfToken.type = 'hidden';
-            csrfToken.name = '_token';
-            csrfToken.value = '{{ csrf_token() }}';
-            form.appendChild(csrfToken);
+    // Fungsi hapus dengan konfirmasi SweetAlert
+    function confirmDelete(id) {
+        Swal.fire({
+            title: 'Apakah Anda yakin?',
+            text: "Data ini akan dihapus dan tidak bisa dikembalikan!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Ya, hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                let form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `/kategori/${id}`;
+                
+                let csrfToken = document.createElement('input');
+                csrfToken.type = 'hidden';
+                csrfToken.name = '_token';
+                csrfToken.value = '{{ csrf_token() }}';
+                form.appendChild(csrfToken);
 
-            let methodInput = document.createElement('input');
-            methodInput.type = 'hidden';
-            methodInput.name = '_method';
-            methodInput.value = 'DELETE';
-            form.appendChild(methodInput);
+                let methodInput = document.createElement('input');
+                methodInput.type = 'hidden';
+                methodInput.name = '_method';
+                methodInput.value = 'DELETE';
+                form.appendChild(methodInput);
 
-            document.body.appendChild(form);
-            form.submit();
-        }
-    });
-}
+                document.body.appendChild(form);
+                form.submit();
+            }
+        });
+    }
 </script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 @endsection
