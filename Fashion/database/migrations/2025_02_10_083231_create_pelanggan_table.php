@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('alamat', 200);
             $table->string('no_telp', 50);
             $table->string('email', 50)->nullable();
+            $table->string('tipe')->default('terdaftar'); // atau 'umum'
             $table->timestamps();
         });
     }

@@ -8,16 +8,25 @@
         <div class="col">
             <form method="GET" action="{{ route('produk.index') }}" class="row g-3">
                 <div class="col-auto">
+                    <label for="kategori_filter" class="form-label">Kategori</label>
+                    <select name="kategori_filter" id="kategori_filter" class="form-select" onchange="this.form.submit()">
+                        <option value="">-- Semua Kategori --</option>
+                        @foreach($kategori as $k)
+                            <option value="{{ $k->id }}" {{ request('kategori_filter') == $k->id ? 'selected' : '' }}>
+                                {{ $k->nama }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-auto">
                     <label for="search" class="form-label">Cari Produk</label>
                     <input type="text" name="search" id="search" class="form-control" 
                            placeholder="Nama produk..." value="{{ request('search') }}">
                 </div>
-    
                 <div class="col-auto">
                     <label for="entries" class="form-label">Show Entries</label>
                     <select name="entries" id="entries" class="form-select" onchange="this.form.submit()">
                         @php
-                            // Beberapa opsi jumlah data per halaman
                             $options = [5, 10, 25, 50, 100];
                         @endphp
                         @foreach($options as $opt)
@@ -28,19 +37,13 @@
                         @endforeach
                     </select>
                 </div>
-    
                 <div class="col-auto d-flex align-items-end">
-                    <button type="submit" class="btn btn-secondary">
-                        Search
-                    </button>
+                    <button type="submit" class="btn btn-secondary">Search</button>
                 </div>
             </form>
         </div>
-    
         <div class="col-auto">
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalTambah">
-                Tambah Produk
-            </button>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalTambah">Tambah Produk</button>
         </div>
     </div>
     
@@ -50,6 +53,7 @@
                 <th>No</th>
                 <th>Nama Produk</th>
                 <th>Kategori</th>
+                <th>Pemasok</th>
                 <th>Harga</th>
                 <th>Stok</th>
                 <th>Size</th>
@@ -63,6 +67,7 @@
                 <td>{{ $key + 1 }}</td>
                 <td>{{ $p->nama }}</td>
                 <td>{{ $p->kategori->nama ?? '-' }}</td>
+                <td>{{ $p->pemasok->nama_pemasok?? '-' }}</td>
                 <td>Rp {{ number_format($p->harga, 2, ',', '.') }}</td>
                 <td>{{ $p->stok }}</td>
                 <td>{{ $p->size ?? '-' }}</td>
@@ -78,6 +83,7 @@
                             data-id="{{ $p->id }}" 
                             data-nama="{{ $p->nama }}"
                             data-kategori="{{ $p->kategori->id ?? '' }}"
+                            data-pemasok="{{ $p->pemasok->id ?? '' }}"
                             data-harga="{{ $p->harga }}"
                             data-stok="{{ $p->stok }}"
                             data-size="{{ $p->size }}"
@@ -110,6 +116,14 @@
                         <label class="form-label">Nama Produk</label>
                         <input type="text" class="form-control" name="nama" required>
                     </div>
+                    <div class="mb-3">
+                        <label class="form-label">Pemasok</label>
+                        <select id="edit_pemasok" name="pemasok_id" class="form-control" required>
+                            @foreach($pemasok as $p)
+                                <option value="{{ $p->id }}">{{ $p->nama_pemasok }}</option>
+                            @endforeach
+                        </select>
+                    </div>                    
                     <div class="mb-3">
                         <label for="kategori" class="form-label">Kategori</label>
                         <select name="kategori_id" class="form-control" required>
@@ -154,36 +168,46 @@
                 <form id="formEdit" method="POST" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
+                    <input type="hidden" id="edit_id" name="id">
+                    
                     <div class="mb-3">
                         <label class="form-label">Nama Produk</label>
-                        <input type="text" id="edit_nama" name="nama" class="form-control" required>
+                        <input type="text" id="edit_nama" class="form-control" name="nama" required>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Kategori</label>
+                        <label class="form-label">Pemasok</label>
+                        <select id="edit_pemasok" name="pemasok_id" class="form-control" required>
+                            @foreach($pemasok as $p)
+                                <option value="{{ $p->id }}">{{ $p->nama_pemasok }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="kategori" class="form-label">Kategori</label>
                         <select id="edit_kategori" name="kategori_id" class="form-control" required>
                             @foreach($kategori as $k)
                                 <option value="{{ $k->id }}">{{ $k->nama }}</option>
                             @endforeach
                         </select>
-                    </div>                    
+                    </div>
                     <div class="mb-3">
                         <label class="form-label">Harga</label>
-                        <input type="number" id="edit_harga" name="harga" class="form-control" required>
+                        <input type="number" id="edit_harga" class="form-control" name="harga" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Stok</label>
-                        <input type="number" id="edit_stok" name="stok" class="form-control" required>
+                        <input type="number" id="edit_stok" class="form-control" name="stok" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Size</label>
-                        <input type="text" id="edit_size" name="size" class="form-control" placeholder="Contoh: S, M, L atau ukuran numerik">
+                        <input type="text" id="edit_size" class="form-control" name="size">
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Gambar</label>
-                        <input type="file" class="form-control" name="gambar">
-                        <img id="edit_gambar" src="" width="100" style="display: none; margin-top: 10px;">
+                        <input type="file" id="edit_gambar" class="form-control" name="gambar">
+                        <img id="preview_gambar" src="" width="130" class="d-block mt-2">
                     </div>
-                    <button type="submit" class="btn btn-primary">Update</button>
+                    <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
                 </form>
             </div>
         </div>
@@ -205,29 +229,31 @@
     @endif
     
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            document.querySelectorAll(".btn-edit").forEach(button => {
-                button.addEventListener("click", function () {
-                    document.getElementById("edit_nama").value = this.dataset.nama;
-                    document.getElementById("edit_kategori").value = this.dataset.kategori;
-                    document.getElementById("edit_harga").value = this.dataset.harga;
-                    document.getElementById("edit_stok").value = this.dataset.stok;
-                    document.getElementById("edit_size").value = this.dataset.size ? this.dataset.size : '';
-                    
-                    let gambar = this.dataset.gambar;
-                    if (gambar) {
-                        document.getElementById("edit_gambar").src = gambar;
-                        document.getElementById("edit_gambar").style.display = "block";
-                    } else {
-                        document.getElementById("edit_gambar").style.display = "none";
-                    }
-                    
-                    let formEdit = document.getElementById("formEdit");
-                    formEdit.setAttribute("action", `/produk/${this.dataset.id}`);
-                });
+        //edit
+        document.addEventListener("DOMContentLoaded", function() {
+        document.querySelectorAll(".btn-edit").forEach(button => {
+            button.addEventListener("click", function() {
+                document.getElementById("edit_id").value = this.dataset.id;
+                document.getElementById("edit_nama").value = this.dataset.nama;
+                document.getElementById("edit_kategori").value = this.dataset.kategori;
+                document.getElementById("edit_pemasok").value = this.dataset.pemasok;
+                document.getElementById("edit_harga").value = this.dataset.harga;
+                document.getElementById("edit_stok").value = this.dataset.stok;
+                document.getElementById("edit_size").value = this.dataset.size;
+                
+                let imgPreview = document.getElementById("preview_gambar");
+                if (this.dataset.gambar) {
+                    imgPreview.src = this.dataset.gambar;
+                    imgPreview.style.display = "block";
+                } else {
+                    imgPreview.style.display = "none";
+                }
+
+                document.getElementById("formEdit").action = "/produk/" + this.dataset.id;
             });
         });
-
+    });
+    
         function confirmDelete(id) {
             Swal.fire({
                 title: 'Apakah Anda yakin?',

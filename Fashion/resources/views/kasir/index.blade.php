@@ -26,8 +26,14 @@
                             @foreach($pelanggan as $pel)
                                 <option value="{{ $pel->id }}">{{ $pel->nama }}</option>
                             @endforeach
+                            <option value="umum">Pelanggan Umum</option>
                         </select>
                     </div>
+                    <div class="col-md-6">
+                        <label for="nama_pelanggan" class="form-label"> Pelanggan</label>
+                        <input type="text" name="nama_pelanggan" id="nama_pelanggan" class="form-control" 
+                            placeholder="Isi jika pelanggan tidak terdaftar" required>
+                    </div>                                                          
                     <div class="col-md-6">
                         <label for="tgl_faktur" class="form-label">Tanggal Faktur</label>
                         <input type="date" name="tgl_faktur" id="tgl_faktur" class="form-control" 
@@ -41,9 +47,10 @@
                     <thead class="table-light">
                         <tr>
                             <th>Produk</th>
-                            <th style="width: 20%">Harga</th>
+                            <th style="width: 15%">Size</th>
+                            <th style="width: 15%">Harga</th>
                             <th style="width: 10%">Jumlah</th>
-                            <th style="width: 20%">Subtotal</th>
+                            <th style="width: 15%">Subtotal</th>
                             <th style="width: 5%">Aksi</th>
                         </tr>
                     </thead>
@@ -54,19 +61,6 @@
                 <button type="button" class="btn btn-secondary mb-4" id="btnTambahProduk">
                     Tambah Produk
                 </button>
-
-                <!-- Size (opsional) -->
-                <div class="mb-3 row">
-                    <label for="size" class="col-sm-2 col-form-label">Size</label>
-                    <div class="col-sm-4">
-                        <select name="size" id="size" class="form-select">
-                            <option value="">Pilih Size</option>
-                            @foreach($availableSizes as $s)
-                                <option value="{{ $s }}">{{ $s }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                </div>
 
                 <!-- Total Bayar, Bayar, dan Kembalian -->
                 <div class="row">
@@ -111,6 +105,7 @@
 
     document.addEventListener('DOMContentLoaded', function() {
         const produkData = @json($produk);
+        const availableSizes = @json($availableSizes);
         let counter = 0;
 
         // Tombol "Tambah Produk"
@@ -124,10 +119,21 @@
                             data-index="${counter}" required>
                         <option value="">Pilih Produk</option>
                         ${
-                            produkData.map(p => `
+                            produkData.map(p => ` 
                                 <option value="${p.id}" data-harga="${p.harga}">
                                     ${p.nama}
                                 </option>
+                            `).join('')
+                        }
+                    </select>
+                </td>
+                <td>
+                    <select name="size[]" class="form-select size-select" 
+                            data-index="${counter}" required>
+                        <option value="">Pilih Size</option>
+                        ${
+                            availableSizes.map(s => `
+                                <option value="${s}">${s}</option>
                             `).join('')
                         }
                     </select>
@@ -209,10 +215,25 @@
             const total   = parseFloat(document.getElementById('total_bayar').value) || 0;
             const dibayar = parseFloat(document.getElementById('dibayar').value) || 0;
             const kembali = dibayar - total;
-            document.getElementById('kembali').value = kembali >= 0 
-                ? kembali.toFixed(2)
-                : 0;
+            document.getElementById('kembali').value = kembali >= 0 ? kembali.toFixed(2) : 0;
         }
     });
+
+    document.getElementById('pelanggan_id').addEventListener('change', function() {
+    let pelangganInput = document.getElementById('nama_pelanggan');
+
+    if (this.value === 'umum') {
+        pelangganInput.disabled = true;
+        pelangganInput.required = false;
+        pelangganInput.value = "Umum"; // Bisa diganti dengan ID tertentu
+    } else {
+        pelangganInput.disabled = false;
+        pelangganInput.required = true;
+        pelangganInput.value = '';
+    }
+});
+
+
+
 </script>
 @endpush

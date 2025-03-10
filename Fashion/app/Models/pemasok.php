@@ -12,7 +12,7 @@ class Pemasok extends Model
     protected $table = 'pemasok';
 
     protected $fillable = [
-        'nama_pemasok',
+        'nama_pemasok', 
         'nomor_telepon',
         'email',
         'alamat',
@@ -24,7 +24,7 @@ class Pemasok extends Model
     {
         return $this->hasMany(Produk::class, 'pemasok_id');
     }
-    
 }
+
 
 

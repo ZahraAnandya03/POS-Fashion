@@ -12,6 +12,7 @@ use App\Http\Controllers\PelangganController;
 use App\Http\Controllers\PenjualanController;
 use App\Http\Controllers\TransaksiController;
 use App\Http\Controllers\KasirController;
+use App\Http\Controllers\LaporanController;
 use Illuminate\Support\Facades\Auth;
 
 // Rute default diarahkan ke login
@@ -59,7 +60,7 @@ Route::get('/dashboard', function () {
 
     //penjualan
     Route::resource('penjualan', PenjualanController::class)->middleware('auth');
-    Route::post('/penjualan', [PenjualanController::class, 'store'])->name('penjualan.store');
+    // Route::post('/penjualan', [PenjualanController::class, 'store'])->name('penjualan.store');
 
     //kasir
     Route::get('/kasir', [KasirController::class, 'index'])->name('kasir.index');
@@ -67,7 +68,11 @@ Route::get('/dashboard', function () {
     Route::get('/kasir/pembayaran/{id}', [KasirController::class, 'pembayaran'])->name('kasir.pembayaran');
     Route::post('/kasir/pembayaran/{id}', [KasirController::class, 'prosesBayar'])->name('kasir.prosesBayar');
     Route::get('/kasir/cetak-nota/{id}', [KasirController::class, 'cetakNota'])->name('kasir.cetakNota');
-    
+
+    //laporan
+    Route::get('/laporan/barang', [LaporanController::class, 'laporanBarang'])->name('laporan.laporan_barang');
+    Route::get('/laporan/barang/cetak', [LaporanController::class, 'cetakLaporan'])->name('laporan.barang.cetak');
+    Route::get('/penjualan/laporan-pdf', [PenjualanController::class, 'cetakPdf'])->name('penjualan.laporan_pdf');
     });
 
     //transaksi

@@ -29,6 +29,8 @@ class PemasokController extends Controller
             'catatan' => 'nullable|string',
         ]);
 
+        // dd($request->all());
+
         Pemasok::create($request->all());
 
         return redirect()->route('pemasok.index')->with('success', 'Pemasok berhasil ditambahkan.');

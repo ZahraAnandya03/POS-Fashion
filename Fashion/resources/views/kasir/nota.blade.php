@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <title>Nota - {{ $penjualan->no_faktur }}</title>
@@ -7,7 +7,8 @@
         body { 
             font-family: Arial, sans-serif; 
             font-size: 14px; 
-            text-align: center;
+            text-align: center; 
+            margin: 0;
         }
         .nota-container { 
             width: 80mm; 
@@ -41,57 +42,58 @@
     </style>
 </head>
 <body onload="window.print()">
-<div class="nota-container">
-    <div class="nota-header">
-        <h3>Nota Penjualan</h3>
-        <p>{{ $penjualan->no_faktur }}</p>
-    </div>
-    
-    <div class="nota-body">
-        <p><strong>Tanggal:</strong> {{ $penjualan->tgl_faktur }}</p>
-        <p><strong>Pelanggan:</strong> {{ $penjualan->pelanggan->nama ?? '-' }}</p>
-        <p><strong>Size:</strong> {{ $penjualan->size ?? '-' }}</p>
+    <div class="nota-container">
+        <div class="nota-header">
+            <h3>Nota Penjualan</h3>
+            <p>No. Faktur: {{ $penjualan->no_faktur }}</p>
+        </div>
+        
+        <div class="nota-body">
+            <p><strong>Tanggal:</strong> {{ \Carbon\Carbon::parse($penjualan->tgl_faktur)->format('d-m-Y H:i') }}</p>
+            <p><strong>Pelanggan:</strong> {{ $penjualan->pelanggan->nama ?? '-' }}</p>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Produk</th>
-                    <th class="text-center">Qty</th>
-                    <th class="text-right">Harga</th>
-                    <th class="text-right">Subtotal</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($penjualan->detail as $detail)
-                <tr>
-                    <td>{{ $detail->produk->nama }}</td>
-                    <td class="text-center">{{ $detail->jumlah }}</td>
-                    <td class="text-right">Rp. {{ number_format($detail->harga_jual, 2, ',', '.') }}</td>
-                    <td class="text-right">Rp. {{ number_format($detail->sub_total, 2, ',', '.') }}</td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Produk</th>
+                        <th class="text-center">Size</th>
+                        <th class="text-center">Qty</th>
+                        <th class="text-right">Harga</th>
+                        <th class="text-right">Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($penjualan->detail as $detail)
+                    <tr>
+                        <td>{{ $detail->produk->nama }}</td>
+                        <td class="text-center">{{ $detail->produk->size ?? '-' }}</td>
+                        <td class="text-center">{{ $detail->jumlah }}</td>
+                        <td class="text-right">Rp {{ number_format($detail->harga_jual, 0, ',', '.') }}</td>
+                        <td class="text-right">Rp {{ number_format($detail->sub_total, 0, ',', '.') }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
 
-        <table>
-            <tr>
-                <td><strong>Total:</strong></td>
-                <td class="text-right">Rp. {{ number_format($penjualan->total_bayar, 2, ',', '.') }}</td>
-            </tr>
-            <tr>
-                <td><strong>Bayar:</strong></td>
-                <td class="text-right">Rp. {{ number_format($penjualan->dibayar, 2, ',', '.') }}</td>
-            </tr>
-            <tr>
-                <td><strong>Kembali:</strong></td>
-                <td class="text-right">Rp. {{ number_format($penjualan->kembali, 2, ',', '.') }}</td>
-            </tr>
-        </table>
+            <table>
+                <tr>
+                    <td><strong>Total:</strong></td>
+                    <td class="text-right">Rp {{ number_format($penjualan->total_bayar, 0, ',', '.') }}</td>
+                </tr>
+                <tr>
+                    <td><strong>Bayar:</strong></td>
+                    <td class="text-right">Rp {{ number_format($penjualan->dibayar, 0, ',', '.') }}</td>
+                </tr>
+                <tr>
+                    <td><strong>Kembali:</strong></td>
+                    <td class="text-right">Rp {{ number_format($penjualan->kembali, 0, ',', '.') }}</td>
+                </tr>
+            </table>
+        </div>
+        
+        <div class="nota-footer">
+            <p>Terima kasih telah berbelanja.</p>
+        </div>
     </div>
-    
-    <div class="nota-footer">
-        <p>Terima kasih telah berbelanja.</p>
-    </div>
-</div>
 </body>
 </html>

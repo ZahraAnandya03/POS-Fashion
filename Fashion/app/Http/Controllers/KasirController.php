@@ -16,8 +16,7 @@ class KasirController extends Controller
      */
     public function index()
     {
-        // Ambil data produk, pelanggan, dan size yang tersedia
-        $produk = Produk::all(); // Pastikan produk->harga = 25000.00 dsb.
+        $produk = Produk::all(); 
         $pelanggan = Pelanggan::all();
         $availableSizes = Produk::whereNotNull('size')
                                 ->distinct()
@@ -35,11 +34,13 @@ class KasirController extends Controller
     {
         $request->validate([
             'tgl_faktur'   => 'required|date',
-            'pelanggan_id' => 'required|exists:pelanggan,id',
-            'size'         => 'nullable|string|max:50',
+            'pelanggan_id' => 'nullable|exists:pelanggan,id',
+            'nama_pelanggan' => 'nullable|string|max:255|required_if:pelanggan_id,null',
 
             'produk_id'    => 'required|array',
             'produk_id.*'  => 'required|exists:produk,id',
+            'size'         => 'required|array',
+            'size.*'       => 'required|string|max:50',
             'harga_jual'   => 'required|array',
             'harga_jual.*' => 'required|numeric|min:0',
             'jumlah'       => 'required|array',
@@ -51,33 +52,41 @@ class KasirController extends Controller
 
         try {
             $penjualan = DB::transaction(function () use ($request) {
-                // Generate no_faktur
+                // Jika pelanggan "umum", buat pelanggan baru dan gunakan ID-nya
+                if (empty($request->pelanggan_id)) {
+                    $pelanggan = Pelanggan::create([
+                        'nama' => $request->nama_pelanggan,
+                    ]);
+                    $pelanggan_id = $pelanggan->id;
+                } else {
+                    $pelanggan_id = $request->pelanggan_id;
+                }
+
+                // Generate nomor faktur
                 $tanggalFaktur = $request->tgl_faktur;
                 $todayString   = date('Ymd', strtotime($tanggalFaktur));
                 $countToday    = Penjualan::whereDate('tgl_faktur', $tanggalFaktur)->count() + 1;
                 $no_faktur     = 'INV-' . $todayString . '-' . str_pad($countToday, 4, '0', STR_PAD_LEFT);
 
-                // Hitung kembali
+                // Hitung kembalian
                 $dibayar = $request->dibayar ?? 0;
-                $kembali = ($dibayar >= $request->total_bayar)
-                    ? ($dibayar - $request->total_bayar)
-                    : 0;
+                $kembali = ($dibayar >= $request->total_bayar) ? ($dibayar - $request->total_bayar) : 0;
 
-                // Buat penjualan
+                // Simpan data penjualan
                 $penjualan = Penjualan::create([
                     'no_faktur'    => $no_faktur,
                     'tgl_faktur'   => $tanggalFaktur,
-                    'pelanggan_id' => $request->pelanggan_id,
-                    'size'         => $request->size,
+                    'pelanggan_id' => $pelanggan_id,
                     'total_bayar'  => $request->total_bayar,
                     'dibayar'      => $dibayar,
                     'kembali'      => $kembali,
                 ]);
 
-                // Simpan detail penjualan dan update stok
+                // Simpan detail penjualan
                 foreach ($request->produk_id as $key => $produk_id) {
                     $harga_jual = $request->harga_jual[$key];
                     $jumlah     = $request->jumlah[$key];
+                    $size       = $request->size[$key] ?? '-';
                     $sub_total  = $harga_jual * $jumlah;
 
                     $produk = Produk::findOrFail($produk_id);
@@ -88,11 +97,13 @@ class KasirController extends Controller
                     DetailPenjualan::create([
                         'penjualan_id' => $penjualan->id,
                         'produk_id'    => $produk_id,
+                        'size'         => $size,
                         'harga_jual'   => $harga_jual,
                         'jumlah'       => $jumlah,
                         'sub_total'    => $sub_total,
                     ]);
 
+                    // Kurangi stok produk
                     $produk->stok -= $jumlah;
                     $produk->save();
                 }
@@ -101,11 +112,14 @@ class KasirController extends Controller
             });
 
             return redirect()->route('kasir.pembayaran', $penjualan->id)
-                             ->with('success', 'Transaksi berhasil disimpan. Lanjutkan pembayaran.');
+                            ->with('success', 'Transaksi berhasil disimpan. Lanjutkan pembayaran.');
         } catch (\Exception $e) {
             return back()->withErrors($e->getMessage());
         }
     }
+
+
+
 
     /**
      * Halaman pembayaran, menampilkan detail penjualan.
@@ -126,8 +140,6 @@ class KasirController extends Controller
         ]);
 
         $penjualan = Penjualan::findOrFail($id);
-
-        // Tambah pembayaran (atau ganti dengan '=' jika menimpa)
         $penjualan->dibayar += $request->dibayar;
 
         if ($penjualan->dibayar >= $penjualan->total_bayar) {

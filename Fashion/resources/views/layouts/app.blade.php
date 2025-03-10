@@ -81,18 +81,28 @@
                             <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
                             Pelanggan
                         </a>
-                        <a class="nav-link" href="{{ route('penjualan.index') }}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-store"></i></div>
-                            Penjualan
-                        </a>
                         <a class="nav-link" href="{{ route('kasir.index') }}">
                             <div class="sb-nav-link-icon"><i class="fas fa-cash-register"></i></div>
                             Kasir
                         </a>
-                        <a class="nav-link" href="#laporan">
+                        <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseLaporan" aria-expanded="false" aria-controls="collapseLaporan">
                             <div class="sb-nav-link-icon"><i class="fas fa-file-alt"></i></div>
                             Laporan
+                            <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
                         </a>
+                        <div class="collapse" id="collapseLaporan" aria-labelledby="headingLaporan" data-bs-parent="#sidenavAccordion">
+                            <nav class="sb-sidenav-menu-nested nav">
+                                <a class="nav-link" href="{{ route('penjualan.index') }}">
+                                    <i class="fas fa-chart-line me-2"></i> Laporan Penjualan
+                                </a>
+                                <a class="nav-link" href="{{ route('laporan.laporan_barang') }}">
+                                    <i class="fas fa-box-open me-2"></i> Laporan Data Barang
+                                </a>
+                                <a class="nav-link" href="#">
+                                    <i class="fas fa-box-open me-2"></i> Laporan Keuntungan 
+                                </a>
+                            </nav>
+                        </div>                                             
                         <a class="nav-link" href="{{ route('user.index') }}">
                             <div class="sb-nav-link-icon"><i class="fas fa-user"></i></div>
                             User

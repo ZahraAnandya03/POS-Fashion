@@ -8,6 +8,7 @@ use App\Models\Penjualan;
 use App\Models\Pelanggan;
 use App\Models\Produk;
 use App\Models\DetailPenjualan;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class PenjualanController extends Controller
 {
@@ -37,6 +38,22 @@ class PenjualanController extends Controller
                                 ->values();
 
         return view('penjualan.index', compact('penjualan', 'pelanggan', 'produk', 'availableSizes'));
+    }
+
+    public function cetakPdf(Request $request)
+    {
+        $query = Penjualan::query();
+
+        if ($request->filled('tanggal_awal') && $request->filled('tanggal_akhir')) {
+            $query->whereBetween('tgl_faktur', [$request->tanggal_awal, $request->tanggal_akhir]);
+        }
+
+        $penjualan = $query->get();
+
+        $pdf = Pdf::loadView('penjualan.laporan_pdf', compact('penjualan'))
+            ->setPaper('a4', 'landscape');
+
+        return $pdf->stream('laporan_penjualan.pdf');
     }
     
     public function store(Request $request)
