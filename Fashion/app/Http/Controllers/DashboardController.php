@@ -12,61 +12,51 @@ use App\Models\Penjualan;
 class DashboardController extends Controller
 {
     public function index()
-    {
-        // Ambil data penjualan per bulan yang ada transaksi
-        $penjualanBulanan = Penjualan::select(
-                DB::raw("DATE_FORMAT(tgl_faktur, '%M') as bulan"),
-                DB::raw("SUM(total_bayar) as total")
-            )
-            ->groupBy('bulan')
-            ->orderBy(DB::raw("MIN(tgl_faktur)"))
-            ->get();
+{
+    // Ambil data penjualan per hari yang ada transaksi
+    $penjualanHarian = Penjualan::select(
+        DB::raw("DATE(tgl_faktur) as tanggal"),
+        DB::raw("SUM(total_bayar) as total")
+    )
+    ->groupBy('tanggal')
+    ->orderBy('tanggal')
+    ->get();
 
-        // Mapping nama bulan dari bahasa Inggris ke bahasa Indonesia
-        $mappingBulan = [
-            'January'   => 'Januari',
-            'February'  => 'Februari',
-            'March'     => 'Maret',
-            'April'     => 'April',
-            'May'       => 'Mei',
-            'June'      => 'Juni',
-            'July'      => 'Juli',
-            'August'    => 'Agustus',
-            'September' => 'September',
-            'October'   => 'Oktober',
-            'November'  => 'November',
-            'December'  => 'Desember',
-        ];
+    // Inisialisasi array lengkap untuk semua hari dalam bulan berjalan
+    $periode = [];
+    $totalTransaksi = [];
+    $startDate = now()->startOfMonth();
+    $endDate = now()->endOfMonth();
 
-        // Array lengkap untuk semua bulan (dalam bahasa Indonesia)
-        $allBulan = [
-            'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-            'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
-        ];
+    while ($startDate <= $endDate) {
+        $periode[$startDate->format('d M Y')] = 0;
+        $totalTransaksi[$startDate->format('d M Y')] = 0;
+        $startDate->addDay();
+    }
 
-        // Ubah data query sehingga key-nya adalah nama bulan dalam bahasa Indonesia
-        $dataPenjualan = [];
-        foreach ($penjualanBulanan as $record) {
-            $bulanInggris = $record->bulan;
-            $bulanIndonesia = isset($mappingBulan[$bulanInggris]) ? $mappingBulan[$bulanInggris] : $bulanInggris;
-            $dataPenjualan[$bulanIndonesia] = $record->total;
-        }
+    // Isi array dengan data dari database
+    foreach ($penjualanHarian as $record) {
+        $tanggalFormat = date('d M Y', strtotime($record->tanggal));
+        $periode[$tanggalFormat] = $record->total;
+        $totalTransaksi[$tanggalFormat] = $record->count();
+    }
 
-        // Inisialisasi array untuk grafik
-        $bulanPenjualan = [];
-        $jumlahPenjualanBulanan = [];
-        foreach ($allBulan as $bulan) {
-            $bulanPenjualan[] = $bulan;
-            $jumlahPenjualanBulanan[] = isset($dataPenjualan[$bulan]) ? $dataPenjualan[$bulan] : 0;
-        }
+    // dd($totalTransaksi);
 
-        return view('dashboard', [
-            'jumlahProduk'           => Produk::count(),
-            'jumlahPenjualan'        => Penjualan::count(),
-            'jumlahPelanggan'        => Pelanggan::count(),
-            'jumlahPemasok'          => Pemasok::count(),
-            'bulanPenjualan'         => $bulanPenjualan,
-            'jumlahPenjualanBulanan' => $jumlahPenjualanBulanan,
+    // Konversi ke array untuk JavaScript
+    $hariPenjualan = array_keys($periode);
+    $jumlahPenjualanHarian = array_values($periode);
+    $totalTransaksis = array_values($totalTransaksi);
+
+    return view('dashboard', [
+        'jumlahProduk'           => Produk::count(),
+        'jumlahPenjualan'        => Penjualan::count(),
+        'jumlahPelanggan'        => Pelanggan::count(),
+        'jumlahPemasok'          => Pemasok::count(),
+        'hariPenjualan'         => $hariPenjualan,
+        'jumlahPenjualanHarian' => $jumlahPenjualanHarian,
+        'totalTransaksi' => $totalTransaksis,
         ]);
     }
-}
+
+} 

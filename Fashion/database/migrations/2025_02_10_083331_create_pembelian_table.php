@@ -13,14 +13,15 @@ return new class extends Migration
     {
         Schema::create('pembelian', function (Blueprint $table) {
             $table->id();
-            $table->string('kode_masuk', 50);
-            $table->date('tanggal_masuk');
-            $table->double('total');
-            $table->foreignId('pemasok_id')->constrained('pemasok');
-            $table->foreignId('user_id')->constrained('users');
+            $table->foreignId('pemasok_id')
+                ->constrained('pemasok')
+                ->cascadeOnDelete();
+            $table->date('tanggal');
+            $table->decimal('total_harga', 10, 2)->default(0);
             $table->timestamps();
         });
     }
+    
 
     public function down()
     {

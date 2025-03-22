@@ -8,22 +8,26 @@
     <table class="table table-bordered">
         <thead class="table-dark">
             <tr>
+                <th>Id</th>
                 <th>Nama</th>
                 <th>Nomor Telepon</th>
                 <th>Email</th>
                 <th>Alamat</th>
                 <th>Nama Kontak</th>
+                <th>Catatan</th>
                 <th>Aksi</th>
             </tr>
         </thead>
         <tbody>
             @foreach($pemasok as $p)
             <tr>
+                <td>{{ $loop->iteration }}</td>
                 <td>{{ $p->nama_pemasok }}</td>
                 <td>{{ $p->nomor_telepon }}</td>
                 <td>{{ $p->email }}</td>
                 <td>{{ $p->alamat }}</td>
                 <td>{{ $p->nama_kontak }}</td>
+                <td>{{ $p->catatan }}</td>
                 <td>
                     <!-- Tombol Edit -->
                     <button class="btn btn-primary btn-sm btn-edit" 

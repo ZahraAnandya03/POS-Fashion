@@ -1,0 +1,7 @@
+﻿id;nama;kategori_id;pemasok_id;harga;stok;harga_beli;size;gambar
+1;Daster;Baju Wanita;Fashionindo;45.000;1;40.000;S;storage/gambar/daster.jpg
+2;Kameja;Baju Pria;Fashionindo;60.000;1;55.000;S;storage/gambar/kameja_biru.jpg
+3;Jeans;Celana Wanita;Gaya Trend Garment;150.000;1;140.000;S;storage/gambar/jenas.jpg
+4;Short Pants;Celana Pria;Gaya Trend Garment;100.000;1;90.000;S;storage/gambar/celpen.jpg
+5;Overall ;Baju Anak Wanita ;Mega Busana;75.000;1;70.000;S;storage/gambar/kodok.jpg
+6;Kameja ;Baju Anak Pria;Mega Busana;55.000;1;50.000;S;storage/gambar/boy.jpg

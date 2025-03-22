@@ -1,0 +1,47 @@
+[
+    {
+        "id":1,
+        "kode_pelanggan":"1",
+        "nama":"Zahra",
+        "alamat":"Perumahan Pesona",
+        "no_telp":85622549921,
+        "email":"zahra@gmail.com",
+        "tipe":"Terdaftar"
+    },
+    {
+        "id":2,
+        "kode_pelanggan":"2",
+        "nama":"Aqeela",
+        "alamat":"Perumahan Humaira",
+        "no_telp":81238455567        ,
+        "email":"aqeela@gmail.com",
+        "tipe":"Terdaftar"
+    },
+    {
+        "id":3,
+        "kode_pelanggan":"3",
+        "nama":"Rizki",
+        "alamat":"Kp Sirnalaya",
+        "no_telp":87766889912,
+        "email":"rizki@gmail.com",
+        "tipe":"Terdaftar"
+    },
+    {
+        "id":4,
+        "kode_pelanggan":"4",
+        "nama":"Alfandro",
+        "alamat":"Komplek Matahari",
+        "no_telp":85795820052        ,
+        "email":"alfandro@gmail.com",
+        "tipe":"Terdaftar"
+    },
+    {
+        "id":5,
+        "kode_pelanggan":"5",
+        "nama":"Angel",
+        "alamat":"Komplek Buah Batu",
+        "no_telp":83820432646        ,
+        "email":"angel@gmail.com",
+        "tipe":"Terdaftar"
+    }
+]

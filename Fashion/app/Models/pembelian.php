@@ -10,23 +10,15 @@ class Pembelian extends Model
     use HasFactory;
 
     protected $table = 'pembelian';
-    protected $fillable = [
-        'kode_masuk',
-        'tanggal_masuk',
-        'total',
-        'pemasok_id',
-        'user_id'
-    ];
+    protected $fillable = ['pemasok_id', 'tanggal', 'total_harga'];
 
-    // Relasi ke Pemasok
     public function pemasok()
     {
-        return $this->belongsTo(Pemasok::class, 'pemasok_id');
+        return $this->belongsTo(Pemasok::class);
     }
 
-    // Relasi ke User
-    public function user()
+    public function detail()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->hasMany(DetailPembelian::class);
     }
 }

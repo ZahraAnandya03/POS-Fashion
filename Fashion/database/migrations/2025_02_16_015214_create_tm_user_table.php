@@ -10,7 +10,7 @@ return new class extends Migration {
         Schema::create('tm_user', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('email')->unique();
+            $table->string('email')->nullable();
             $table->string('password');
             $table->enum('role', ['admin', 'user', 'kasir'])->default('user'); // Bisa admin atau user
             $table->timestamps();

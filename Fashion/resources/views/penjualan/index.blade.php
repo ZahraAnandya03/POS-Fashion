@@ -22,46 +22,49 @@
                         Filter
                     </button>
                 </div>
+            </div>        
             </form>
+            <div class="col text-end">
+                <a href="{{ route('penjualan.pdf', ['tanggal_awal' => request('tanggal_awal'), 'tanggal_akhir' => request('tanggal_akhir')]) }}" 
+                    class="btn btn-primary">
+                    <i class="fas fa-file-pdf"></i> Cetak
+                </a>
+                
+            </div>
         </div>
-
-        <div class="col-auto">
-            <a href="{{ route('penjualan.laporan_pdf', ['tanggal_awal' => request('tanggal_awal'), 'tanggal_akhir' => request('tanggal_akhir')]) }}" 
-               class="btn btn-primary">
-                Cetak PDF
-            </a>
-        </div>
-    </div>    
+    </div>
+    
 
     <!-- Tabel Penjualan -->
-    <table class="table table-bordered">
-        <thead class="table-dark">
-            <tr>
-                <th>No.</th>
-                <th>Invoice</th>
-                <th>Tanggal</th>
-                <th>Customer</th>
-                <th>Total</th>
-                <th>Bayar</th>
-                <th>Kembali</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($penjualan as $key => $p)
+    <div id="laporanPenjualan">
+        <table class="table table-bordered">
+            <thead class="table-dark">
                 <tr>
-                    <td>{{ $key+1 }}</td>
-                    <td>{{ $p->no_faktur }}</td>
-                    <td>{{ \Carbon\Carbon::parse($p->tgl_faktur)->format('d M Y') }}</td>
-                    <td>{{ $p->pelanggan->nama ?? '-' }}</td>
-                    <td>Rp. {{ number_format($p->total_bayar, 2, ',', '.') }}</td>
-                    <td>Rp. {{ number_format($p->dibayar, 2, ',', '.') }}</td>
-                    <td>Rp. {{ number_format($p->kembali, 2, ',', '.') }}</td>                
+                    <th>No.</th>
+                    <th>Invoice</th>
+                    <th>Tanggal</th>
+                    <th>Customer</th>
+                    <th>Total</th>
+                    <th>Bayar</th>
+                    <th>Kembali</th>
                 </tr>
-            @endforeach
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach($penjualan as $key => $p)
+                    <tr>
+                        <td>{{ $key+1 }}</td>
+                        <td>{{ $p->no_faktur }}</td>
+                        <td>{{ \Carbon\Carbon::parse($p->tgl_faktur)->format('d M Y') }}</td>
+                        <td>{{ $p->pelanggan->nama ?? 'Pelanggan Biasa' }}</td>
+                        <td>Rp. {{ number_format($p->total_bayar, 2, ',', '.') }}</td>
+                        <td>Rp. {{ number_format($p->dibayar, 2, ',', '.') }}</td>
+                        <td>Rp. {{ number_format($p->kembali, 2, ',', '.') }}</td>                
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
 </div>
-  
 @endsection
 
 @push('scripts')
@@ -73,6 +76,40 @@
             text: '{{ session("success") }}'
         });
     @endif
+
+    function printLaporan() {
+        let originalTitle = document.title;
+        document.title = "Laporan Penjualan";
+        
+        let printContent = document.getElementById("laporanPenjualan").outerHTML;
+        let printWindow = window.open("", "_blank");
+        printWindow.document.write(`
+            <html>
+                <head>
+                    <title>Laporan Penjualan</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; }
+                        table { width: 100%; border-collapse: collapse; }
+                        th, td { border: 1px solid black; padding: 8px; text-align: left; }
+                        th { background-color: #f2f2f2; }
+                        @media print {
+                            button { display: none; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <h2 style="text-align: center;">Laporan Penjualan</h2>
+                    ${printContent}
+                </body>
+            </html>
+        `);
+        printWindow.document.close();
+        printWindow.print();
+        printWindow.onafterprint = function() {
+            document.title = originalTitle;
+            printWindow.close();
+        };
+    }
 </script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 @endpush

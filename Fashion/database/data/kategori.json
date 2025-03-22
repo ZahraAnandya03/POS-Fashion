@@ -1,0 +1,26 @@
+[
+    {
+        "id" : 1,
+        "nama":"Baju Wanita"
+    },
+    {
+        "id" : 2,
+        "nama":"Baju Pria"
+    },
+    {
+        "id" : 3,
+        "nama":"Celana Wanita"
+    },
+    {
+        "id" : 4,
+        "nama":"Celana Pria"
+    },
+    {
+        "id" : 5,
+        "nama":"Baju Anak Wanita"
+    },
+    {
+        "id" : 6,
+        "nama":"Baju Anak Pria"
+    }
+]

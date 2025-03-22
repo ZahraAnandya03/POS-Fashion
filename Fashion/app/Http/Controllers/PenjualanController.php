@@ -12,179 +12,83 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class PenjualanController extends Controller
 {
+    /**
+     * Menampilkan daftar transaksi penjualan.
+     * Dapat difilter berdasarkan rentang tanggal.
+     */
     public function index(Request $request)
     {
+        // Query dasar untuk mengambil data penjualan beserta detail produk dan pelanggan
         $query = Penjualan::with(['detail.produk', 'pelanggan']);
 
-        // Filter berdasarkan tanggal
+        // Filter berdasarkan rentang tanggal jika input diberikan
         if ($request->filled('tanggal_awal') && $request->filled('tanggal_akhir')) {
             $tanggalAwal = $request->tanggal_awal;
             $tanggalAkhir = $request->tanggal_akhir;
             $query->whereBetween('tgl_faktur', [$tanggalAwal, $tanggalAkhir]);
         }
 
-        // Ambil data penjualan
-        $penjualan = $query->get();
+        // Mengambil data penjualan yang telah difilter dan mengurutkan berdasarkan tanggal terbaru
+        $penjualan = $query->orderBy('tgl_faktur', 'desc')->get();
 
-        // Data pendukung untuk modal create
+        // Mengambil daftar pelanggan dan produk untuk keperluan form
         $pelanggan = Pelanggan::all();
         $produk    = Produk::all();
 
-        // Ambil size unik dari produk yang tersedia
+        // Mengambil ukuran unik dari produk yang tersedia
         $availableSizes = Produk::whereNotNull('size')
                                 ->distinct()
                                 ->pluck('size')
                                 ->filter()
                                 ->values();
 
+        // Menampilkan halaman daftar penjualan
         return view('penjualan.index', compact('penjualan', 'pelanggan', 'produk', 'availableSizes'));
     }
 
-    public function cetakPdf(Request $request)
+    /**
+     * Mengekspor laporan penjualan ke dalam format PDF.
+     * Dapat difilter berdasarkan rentang tanggal.
+     */
+    public function exportPdf(Request $request)
     {
+        // Mengambil input rentang tanggal dari request
+        $tanggal_awal = $request->input('tanggal_awal');
+        $tanggal_akhir = $request->input('tanggal_akhir');
+
+        // Query dasar untuk mengambil data penjualan
         $query = Penjualan::query();
 
-        if ($request->filled('tanggal_awal') && $request->filled('tanggal_akhir')) {
-            $query->whereBetween('tgl_faktur', [$request->tanggal_awal, $request->tanggal_akhir]);
+        // Jika rentang tanggal diisi, filter berdasarkan rentang tersebut
+        if ($tanggal_awal && $tanggal_akhir) {
+            $query->whereBetween('tgl_faktur', [$tanggal_awal, $tanggal_akhir]);
         }
 
-        $penjualan = $query->get();
+        // Mengambil data penjualan yang telah difilter dan diurutkan berdasarkan tanggal terbaru
+        $penjualan = $query->orderBy('tgl_faktur', 'desc')->get();
 
-        $pdf = Pdf::loadView('penjualan.laporan_pdf', compact('penjualan'))
+        // Jika tidak ada data, munculkan pesan error dan kembali ke halaman sebelumnya
+        if ($penjualan->isEmpty()) {
+            return back()->with('error', 'Tidak ada data penjualan dalam rentang tanggal yang dipilih.');
+        }
+
+        // Membuat file PDF berdasarkan data yang diambil
+        $pdf = Pdf::loadView('penjualan.pdf', compact('penjualan', 'tanggal_awal', 'tanggal_akhir'))
             ->setPaper('a4', 'landscape');
 
-        return $pdf->stream('laporan_penjualan.pdf');
-    }
-    
-    public function store(Request $request)
-    {
-        $request->validate([
-            'tgl_faktur'   => 'required|date',
-            'total_bayar'  => 'required|numeric|min:0',
-            'dibayar'      => 'nullable|numeric|min:0',
-            'pelanggan_id' => 'required|exists:pelanggan,id',
-            'size'         => 'required|string|max:50',
-
-            'produk_id'    => 'required|array',
-            'produk_id.*'  => 'required|exists:produk,id',
-            'harga_jual'   => 'required|array',
-            'harga_jual.*' => 'required|numeric|min:0',
-            'jumlah'       => 'required|array',
-            'jumlah.*'     => 'required|integer|min:1',
-        ]);
-
-        try {
-            $penjualan = DB::transaction(function () use ($request) {
-                $tanggalFaktur = $request->tgl_faktur ?? date('Y-m-d');
-                $todayString = date('Ymd', strtotime($tanggalFaktur));
-                $countToday = Penjualan::whereDate('tgl_faktur', $tanggalFaktur)->count() + 1;
-                $no_faktur = 'INV-' . $todayString . '-' . str_pad($countToday, 4, '0', STR_PAD_LEFT);
-
-                $dibayar = $request->dibayar ?? 0;
-                // Jika dibayar belum cukup, kembali = 0
-                // Jika dibayar >= total_bayar, hitung kembalian
-                $kembali = ($dibayar >= $request->total_bayar)
-                    ? $dibayar - $request->total_bayar
-                    : 0;
-
-                // Simpan data penjualan
-                $penjualan = Penjualan::create([
-                    'no_faktur'    => $no_faktur,
-                    'tgl_faktur'   => $tanggalFaktur,
-                    'total_bayar'  => $request->total_bayar,
-                    'dibayar'      => $dibayar,
-                    'kembali'      => $kembali,
-                    'pelanggan_id' => $request->pelanggan_id,
-                    'size'         => $request->size,
-                ]);
-
-                // Simpan detail penjualan dan update stok produk
-                foreach ($request->produk_id as $key => $produk_id) {
-                    $harga_jual = $request->harga_jual[$key];
-                    $jumlah     = $request->jumlah[$key];
-                    $sub_total  = $harga_jual * $jumlah;
-
-                    $produk = Produk::findOrFail($produk_id);
-                    if ($produk->stok < $jumlah) {
-                        throw new \Exception(
-                            "Stok produk {$produk->nama} tidak mencukupi. Tersedia: {$produk->stok}"
-                        );
-                    }
-
-                    // Simpan detail
-                    DetailPenjualan::create([
-                        'penjualan_id' => $penjualan->id,
-                        'produk_id'    => $produk_id,
-                        'harga_jual'   => $harga_jual,
-                        'jumlah'       => $jumlah,
-                        'sub_total'    => $sub_total,
-                    ]);
-
-                    // Kurangi stok produk
-                    $produk->stok -= $jumlah;
-                    $produk->save();
-                }
-
-                return $penjualan;
-            });
-
-            // Redirect ke halaman pembayaran/nota
-            return redirect()
-                ->route('kasir.pembayaran', ['id' => $penjualan->id])
-                ->with('success', 'Transaksi berhasil disimpan. Lanjutkan pembayaran.');
-        } catch (\Exception $e) {
-            // Batalkan transaksi dan tampilkan pesan error
-            return redirect()->back()->withErrors('Terjadi kesalahan: ' . $e->getMessage());
-        }
+        // Menampilkan file PDF di browser
+        return $pdf->stream('laporan-penjualan.pdf');
     }
 
     /**
-     * Update data penjualan (misal via modal edit).
+     * Menampilkan detail transaksi penjualan berdasarkan ID.
      */
-    public function update(Request $request, $id)
-    {
-        $request->validate([
-            'tgl_faktur'   => 'required|date',
-            'total_bayar'  => 'required|numeric',
-            'dibayar'      => 'nullable|numeric',
-            'pelanggan_id' => 'required|exists:pelanggan,id',
-            'size'         => 'nullable|string|max:50',
-        ]);
-
-        $penjualan = Penjualan::findOrFail($id);
-
-        $penjualan->pelanggan_id = $request->pelanggan_id;
-        $penjualan->tgl_faktur   = $request->tgl_faktur;
-        $penjualan->total_bayar  = $request->total_bayar;
-        $penjualan->dibayar      = $request->dibayar;
-        $penjualan->size         = $request->size;
-        $penjualan->kembali      = ($request->dibayar ?? 0) - $request->total_bayar;
-        $penjualan->save();
-
-        return redirect()
-            ->route('penjualan.index')
-            ->with('success', 'Data penjualan berhasil diupdate');
-    }
-
-    /**
-     * Hapus penjualan dan detailnya.
-     */
-    public function destroy($id)
-    {
-        DB::transaction(function() use ($id) {
-            DetailPenjualan::where('penjualan_id', $id)->delete();
-            Penjualan::destroy($id);
-        });
-
-        return redirect()
-            ->route('penjualan.index')
-            ->with('success', 'Penjualan berhasil dihapus.');
-    }
-
     public function show($id)
     {
+        // Mengambil data penjualan berdasarkan ID beserta relasi detail produk dan pelanggan
         $penjualan = Penjualan::with(['detail.produk', 'pelanggan'])->findOrFail($id);
+
+        // Mengembalikan data dalam format JSON untuk ditampilkan di frontend
         return response()->json($penjualan);
     }
-
 }

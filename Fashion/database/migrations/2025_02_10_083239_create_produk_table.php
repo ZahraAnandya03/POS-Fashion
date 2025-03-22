@@ -14,13 +14,14 @@ return new class extends Migration
         Schema::create('produk', function (Blueprint $table) {
             $table->id();
             $table->string('nama');
-            $table->foreignId('kategori_id')->constrained('kategori');
+            $table->foreignId('kategori_id')->constrained('kategori')->onDelete('cascade'); // Tambahkan cascade delete
             $table->decimal('harga', 10, 2);
             $table->integer('stok');
-            $table->string('size')->nullable(); // Tambahkan ini untuk size
+            $table->enum('size', ['S', 'M', 'L', 'XL', 'XXL'])->nullable(); 
             $table->string('gambar')->nullable();
             $table->timestamps();
         });
+        
     }
 
     /**

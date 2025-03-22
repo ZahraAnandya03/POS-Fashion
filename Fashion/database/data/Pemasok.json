@@ -1,0 +1,29 @@
+[
+    {
+        "id":1,
+        "nama_pemasok":"Fashionindo",
+        "nomor_telepon":81122334455,
+        "email":"fashionindo@gmail.com",
+        "alamat":"Jl. Raya Sudirman No. 45, Jakarta",
+        "nama_kontak":"Budi Permana",
+        "catatan":"Suplier 1"
+    },
+    {
+        "id":2,
+        "nama_pemasok":"Mega Busana",
+        "nomor_telepon":82345678123,
+        "email":"megabusana@gmail.com",
+        "alamat":"Jl. Ahmad Yani No. 99, Yogyakarta",
+        "nama_kontak":"Ria Armasari",
+        "catatan":"Suplier 2"
+    },
+    {
+        "id":3,
+        "nama_pemasok":"Gaya Trend Garment",
+        "nomor_telepon":85643229977,
+        "email":"gayatrend@gmail.com",
+        "alamat":"Jl. Merdeka No. 10, Bandung",
+        "nama_kontak":"Adi Supriadi",
+        "catatan":"Suplier 3"
+    }
+]

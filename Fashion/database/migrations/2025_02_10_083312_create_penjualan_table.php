@@ -17,11 +17,8 @@ return new class extends Migration
             $table->decimal('kembali', 15, 2)->nullable();
             $table->string('size')->nullable();
 
-            // Foreign key ke tabel pelanggan
-            $table->unsignedBigInteger('pelanggan_id');
-            $table->foreign('pelanggan_id')
-                  ->references('id')->on('pelanggan')
-                  ->onDelete('cascade');
+            // Foreign key ke tabel pelanggan, bisa NULL untuk pelanggan umum
+            $table->foreignId('pelanggan_id')->nullable()->constrained('pelanggan')->nullOnDelete();
 
             $table->timestamps();
         });

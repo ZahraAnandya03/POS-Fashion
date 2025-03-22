@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
@@ -12,7 +13,18 @@
     <!-- Styles -->
     <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet" />
     <link href="{{ asset('template/css/styles.css') }}" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+     <!-- CSS Switchery -->
+     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/switchery@0.8.2/switchery.min.css">
+
+    <!-- JS Switchery & jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/switchery@0.8.2/switchery.min.js"></script>
+
     <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+
 
     <style>
         #layoutSidenav_content {
@@ -61,30 +73,55 @@
                 <div class="sb-sidenav-menu">
                     <div class="nav">
                         <div class="sb-sidenav-menu-heading">Menu</div>
+                        @if (Auth::user()->role === 'admin')
                         <a class="nav-link" href="{{ route('dashboard') }}">
                             <div class="sb-nav-link-icon"><i class="fas fa-home"></i></div>
                             Dashboard
                         </a>
+                        @endif
+                        @if (Auth::user()->role === 'admin')
                         <a class="nav-link" href="{{ route('kategori.index') }}">
                             <div class="sb-nav-link-icon"><i class="fas fa-bookmark"></i></div>
                             Kategori
                         </a>
+                        @endif
+                        @if (Auth::user()->role === 'admin' || Auth::user()->role === 'kasir')
                         <a class="nav-link" href="{{ route('produk.index') }}">
                             <div class="sb-nav-link-icon"><i class="fas fa-tshirt"></i></div>
                             Produk
                         </a>
+                        @endif
+                        @if (Auth::user()->role === 'admin')
                         <a class="nav-link" href="{{ route('pemasok.index') }}">
                             <div class="sb-nav-link-icon"><i class="fas fa-truck"></i></div>
                             Pemasok
                         </a>
+                        @endif
+                        @if (Auth::user()->role === 'admin')
+                        <a class="nav-link" href="{{ route('pembelian.index') }}">
+                            <div class="sb-nav-link-icon"><i class="fas fa-cash-register"></i></div>
+                            Pembelian
+                        </a>
+                        @endif
+                        @if (Auth::user()->role === 'admin')
                         <a class="nav-link" href="{{ route('pelanggan.index') }}">
                             <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
                             Pelanggan
                         </a>
+                        @endif
+                        @if (Auth::user()->role === 'admin')
+                        <a class="nav-link" href="{{ route('pengajuan.index') }}">
+                            <div class="sb-nav-link-icon"><i class="fas fa-clipboard-list"></i></div>
+                            Pengajuan Barang
+                        </a>
+                        @endif
+                        @if (Auth::user()->role === 'kasir')
                         <a class="nav-link" href="{{ route('kasir.index') }}">
                             <div class="sb-nav-link-icon"><i class="fas fa-cash-register"></i></div>
                             Kasir
                         </a>
+                        @endif
+                        @if (Auth::user()->role === 'admin' || Auth::user()->role === 'kasir')
                         <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseLaporan" aria-expanded="false" aria-controls="collapseLaporan">
                             <div class="sb-nav-link-icon"><i class="fas fa-file-alt"></i></div>
                             Laporan
@@ -98,19 +135,24 @@
                                 <a class="nav-link" href="{{ route('laporan.laporan_barang') }}">
                                     <i class="fas fa-box-open me-2"></i> Laporan Data Barang
                                 </a>
-                                <a class="nav-link" href="#">
+                                <a class="nav-link" href="{{ route('laporan.keuntungan') }}">
                                     <i class="fas fa-box-open me-2"></i> Laporan Keuntungan 
                                 </a>
                             </nav>
-                        </div>                                             
+                        </div>  
+                        @endif 
+                        @if (Auth::user()->role === 'admin')                                       
                         <a class="nav-link" href="{{ route('user.index') }}">
                             <div class="sb-nav-link-icon"><i class="fas fa-user"></i></div>
                             User
                         </a>
+                        @endif 
+                        @if (Auth::user()->role === 'admin') 
                         <a class="nav-link" href="#pengaturan">
                             <div class="sb-nav-link-icon"><i class="fas fa-cog"></i></div>
                             Pengaturan
                         </a>
+                        @endif
                     </div>
                 </div>
                 <div class="sb-sidenav-footer">

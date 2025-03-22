@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Kategori;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -14,7 +15,25 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        $this->call([
+            KategoriSeeder::class
+    ]);
+        $this->call([
+            PemasokSeeder::class
+    ]);
+        $this->call([
+            PelangganSeeder::class
+    ]);
+        $this->call([
+            ProdukSeeder::class
+    ]);
+        
+    // Kategori::factory()->count(5)->create();
+
+    // $this->call([
+    //     ProdukSeeder::class
+    // ]);
+
 
         User::create([
             'name' => 'Admin',

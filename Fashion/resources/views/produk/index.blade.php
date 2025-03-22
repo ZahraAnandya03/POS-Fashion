@@ -73,7 +73,7 @@
                 <td>{{ $p->size ?? '-' }}</td>
                 <td class="text-center">
                     @if($p->gambar)
-                        <img src="{{ asset('storage/' . $p->gambar) }}" width="130" class="d-block mx-auto">
+                    <img src="{{ asset('storage/' . $p->gambar) }}" alt="{{ $p->nama }}" style="width: 150px; height: auto;">
                     @else
                         -
                     @endif
@@ -87,7 +87,7 @@
                             data-harga="{{ $p->harga }}"
                             data-stok="{{ $p->stok }}"
                             data-size="{{ $p->size }}"
-                            data-gambar="{{ $p->gambar ? asset('storage/' . $p->gambar) : '' }}"
+                            data-gambar="{{ $p->gambar ? asset($p->gambar) : '' }}"
                             data-bs-toggle="modal" data-bs-target="#modalEdit">
                             <i class="fas fa-edit"></i>
                     </button>
@@ -143,7 +143,12 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Size</label>
-                        <input type="text" class="form-control" name="size" placeholder="Contoh: S, M, L atau ukuran numerik">
+                        <select class="form-control" name="size" required>
+                            <option value="">-- Pilih Size --</option>
+                            @foreach(["S", "M", "L", "XL", "XXL"] as $size)
+                                <option value="{{ $size }}">{{ $size }}</option>
+                            @endforeach
+                        </select>                        
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Gambar</label>
@@ -200,7 +205,12 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Size</label>
-                        <input type="text" id="edit_size" class="form-control" name="size">
+                        <select id="edit_size" class="form-control" name="size">
+                            <option value="">-- Pilih Size --</option>
+                            @foreach(["S", "M", "L", "XL", "XXL"] as $size)
+                                <option value="{{ $size }}">{{ $size }}</option>
+                            @endforeach
+                        </select>                        
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Gambar</label>
@@ -233,26 +243,37 @@
         document.addEventListener("DOMContentLoaded", function() {
         document.querySelectorAll(".btn-edit").forEach(button => {
             button.addEventListener("click", function() {
-                document.getElementById("edit_id").value = this.dataset.id;
-                document.getElementById("edit_nama").value = this.dataset.nama;
-                document.getElementById("edit_kategori").value = this.dataset.kategori;
-                document.getElementById("edit_pemasok").value = this.dataset.pemasok;
-                document.getElementById("edit_harga").value = this.dataset.harga;
-                document.getElementById("edit_stok").value = this.dataset.stok;
-                document.getElementById("edit_size").value = this.dataset.size;
+                let editForm = document.getElementById("formEdit");
+                let imgPreview = document.getElementById("imgPreview");
                 
-                let imgPreview = document.getElementById("preview_gambar");
-                if (this.dataset.gambar) {
+                // Isi data ke form
+                document.getElementById("edit_id").value = this.dataset.id || "";
+                document.getElementById("edit_nama").value = this.dataset.nama || "";
+                document.getElementById("edit_kategori").value = this.dataset.kategori || "";
+                document.getElementById("edit_pemasok").value = this.dataset.pemasok || "";
+                document.getElementById("edit_harga").value = this.dataset.harga || "";
+                document.getElementById("edit_stok").value = this.dataset.stok || "";
+                
+                // Menangani pemilihan size
+                let editSizeSelect = document.getElementById("edit_size");
+                let selectedSize = this.dataset.size || "";
+                Array.from(editSizeSelect.options).forEach(option => {
+                    option.selected = option.value === selectedSize;
+                });
+
+                // Update gambar hanya jika tersedia
+                if (imgPreview && this.dataset.gambar) {
                     imgPreview.src = this.dataset.gambar;
-                    imgPreview.style.display = "block";
-                } else {
-                    imgPreview.style.display = "none";
                 }
 
-                document.getElementById("formEdit").action = "/produk/" + this.dataset.id;
+                // Update action form
+                if (editForm) {
+                    editForm.action = "/produk/" + this.dataset.id;
+                }
             });
         });
     });
+
     
         function confirmDelete(id) {
             Swal.fire({
@@ -287,6 +308,28 @@
                 }
             });
         }
+
+        document.addEventListener("DOMContentLoaded", function() {
+        let produkSelect = document.getElementById("produk_id");
+        let sizeSelect = document.getElementById("size");
+
+        produkSelect.addEventListener("change", function() {
+            let selectedOption = this.options[this.selectedIndex];
+            let sizes = selectedOption.dataset.size; // Ambil data size dari option
+
+            sizeSelect.innerHTML = '<option value="">-- Pilih Size --</option>'; // Reset option
+
+            if (sizes) {
+                let sizeArray = sizes.split(","); // Ubah string size jadi array
+                sizeArray.forEach(function(size) {
+                    let option = document.createElement("option");
+                    option.value = size.trim();
+                    option.textContent = size.trim();
+                    sizeSelect.appendChild(option);
+                });
+            }
+        });
+    });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 @endpush

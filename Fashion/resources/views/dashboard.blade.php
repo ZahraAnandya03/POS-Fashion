@@ -13,6 +13,9 @@
         <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/switchery/switchery.css">
+        <script src="https://cdn.jsdelivr.net/npm/switchery/switchery.min.js"></script>
+
     </head>
     <body class="sb-nav-fixed">
         <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
@@ -61,27 +64,41 @@
                                 <div class="sb-nav-link-icon"><i class="fas fa-bookmark"></i></div>
                                 Kategori
                             </a>
+                            @if (Auth::user()->role === 'admin' || Auth::user()->role === 'kasir')
                             <a class="nav-link" href="{{ route('produk.index') }}">
                                 <div class="sb-nav-link-icon"><i class="fas fa-tshirt"></i></div>
                                 Produk
                             </a>
+                            @endif
                             <a class="nav-link" href="{{ route('pemasok.index') }}">
                                 <div class="sb-nav-link-icon"><i class="fas fa-truck"></i></div>
                                 Pemasok
+                            </a>
+                            <a class="nav-link" href="{{ route('pembelian.index') }}">
+                                <div class="sb-nav-link-icon"><i class="fas fa-cash-register"></i></div>
+                                Pembelian
                             </a>
                             <a class="nav-link" href="{{ route('pelanggan.index') }}">
                                 <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
                                 Pelanggan
                             </a>
+                            <a class="nav-link" href="{{ route('pengajuan.index') }}">
+                                <div class="sb-nav-link-icon"><i class="fas fa-clipboard-list"></i></div>
+                                Pengajuan Barang
+                            </a>
+                            @if (Auth::user()->role === 'kasir')
                             <a class="nav-link" href="{{ route('kasir.index') }}">
                                 <div class="sb-nav-link-icon"><i class="fas fa-cash-register"></i></div>
                                 Kasir
                             </a>
+                            @endif
+                            @if (Auth::user()->role === 'admin' || Auth::user()->role === 'kasir')
                             <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseLaporan" aria-expanded="false" aria-controls="collapseLaporan">
                                 <div class="sb-nav-link-icon"><i class="fas fa-file-alt"></i></div>
                                 Laporan
                                 <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
                             </a>
+                            @endif
                             <div class="collapse" id="collapseLaporan" aria-labelledby="headingLaporan" data-bs-parent="#sidenavAccordion">
                                 <nav class="sb-sidenav-menu-nested nav">
                                     <a class="nav-link" href="{{ route('penjualan.index') }}">
@@ -90,7 +107,7 @@
                                     <a class="nav-link" href="{{ route('laporan.laporan_barang') }}">
                                         <i class="fas fa-box-open me-2"></i> Laporan Data Barang
                                     </a>
-                                    <a class="nav-link" href="#">
+                                    <a class="nav-link" href="{{ route('laporan.keuntungan') }}">
                                         <i class="fas fa-box-open me-2"></i> Laporan Keuntungan 
                                     </a>
                                 </nav>
@@ -166,7 +183,7 @@
                                 <div class="card mb-4">
                                     <div class="card-header">
                                         <i class="fas fa-chart-bar me-1"></i>
-                                        Grafik Penjualan Perbulan
+                                        Grafik Penjualan Perhari
                                     </div>
                                     <div class="card-body">
                                         <canvas id="penjualanChart"></canvas>
@@ -181,63 +198,109 @@
 
        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
         <script src="{{ asset('template/js/scripts.js') }}"></script>
-<script>
-    @if (session('success'))
-        Swal.fire({
-            title: 'Berhasil!',
-            text: "{{ session('success') }}",
-            icon: 'success',
-            confirmButtonText: 'OK'
-        });
-    @endif
+        <script>
+            @if (session('success'))
+                Swal.fire({
+                    title: 'Berhasil!',
+                    text: "{{ session('success') }}",
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                });
+            @endif
+        </script>
+        <div id="penjualanChart" style="width: 600px; height: 600px;"></div>
+        {{-- <canvas id="penjualanChart"></canvas> --}}
+        <script>
+           document.addEventListener("DOMContentLoaded", function() {
+    const ctx = document.getElementById('penjualanChart').getContext('2d');
+    
+    const labels = {!! json_encode($hariPenjualan) !!};
+    const dataPenjualan = {!! json_encode($jumlahPenjualanHarian) !!};
+    const dataPembelian = {!! json_encode($totalTransaksi) !!}; // Data pembelian terpisah
 
-    // Inisialisasi grafik penjualan perbulan
-    <canvas id="penjualanChart"></canvas>
-
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        const penjualanCtx = document.getElementById('penjualanChart').getContext('2d');
-        const penjualanChart = new Chart(penjualanCtx, {
-            type: 'bar',
-            data: {
-                labels: {!! json_encode($bulanPenjualan) !!},
-                datasets: [{
-                    label: 'Total Penjualan (Rp)',
-                    data: {!! json_encode($jumlahPenjualanBulanan) !!},
-                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 1
-                }]
+    // Cari nilai maksimum dari kedua dataset
+    const maxValue = Math.max(...dataPenjualan, ...dataPembelian);
+    let stepSize = 5000; 
+    new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: labels,
+        datasets: [
+            {
+                label: 'Total Penjualan',
+                data: dataPenjualan,
+                backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1,
+                yAxisID: 'y1' // Sumbu Y pertama
             },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function(value) {
-                                return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(value);
-                            }
-                        }
+            {
+                label: 'Total Transaksi',
+                data: dataPembelian,
+                backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 1,
+                yAxisID: 'y2' // Sumbu Y kedua
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            x: {
+                ticks: {
+                    maxRotation: 45,
+                    minRotation: 0
+                }
+            },
+            y1: {
+                type: 'linear',
+                position: 'left',
+                beginAtZero: true,
+                ticks: {
+                    stepSize: stepSize,
+                    suggestedMax: maxValue + stepSize,
+                    callback: function(value) {
+                        return new Intl.NumberFormat('id-ID').format(value);
                     }
+                }
+            },
+            y2: {
+                type: 'linear',
+                position: 'right',
+                beginAtZero: true,
+                grid: {
+                    drawOnChartArea: false // Mencegah grid Y2 bertumpuk dengan Y1
                 },
-                plugins: {
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                let label = context.dataset.label || '';
-                                if (label) label += ': ';
-                                if (context.parsed.y !== null) {
-                                    label += new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(context.parsed.y);
-                                }
-                                return label;
-                            }
-                        }
+                ticks: {
+                    stepSize: stepSize,
+                    suggestedMax: maxValue + stepSize,
+                    callback: function(value) {
+                        return new Intl.NumberFormat('id-ID').format(value);
                     }
                 }
             }
-        });
-    </script>
-</script>
-</body>
-</html>
+        },
+        plugins: {
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        let label = context.dataset.label || '';
+                        if (label) label += ': ';
+                        if (context.parsed.y !== null) {
+                            label += new Intl.NumberFormat('id-ID').format(context.parsed.y);
+                        }
+                        return label;
+                    }
+                }
+            }
+        }
+    }
+});
+});
 
+
+    </script>        
+</body>
+</html> 
